@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "242888999854",
+    "project_id": "serbisyo-ph-d05b9",
+    "storage_bucket": "serbisyo-ph-d05b9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:242888999854:android:e3f43a3a81f3d190023e3f",
+        "android_client_info": {
+          "package_name": "com.example.serbisyo_ph"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDj4t-m90B64-o0jl0ChQ5qwIlVs4shG-k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,28 @@
+{
+  "firestore": {
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "serbisyo-ph-d05b9",
+          "appId": "1:242888999854:android:e3f43a3a81f3d190023e3f",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "serbisyo-ph-d05b9",
+          "configurations": {
+            "android": "1:242888999854:android:e3f43a3a81f3d190023e3f",
+            "ios": "1:242888999854:ios:6bfa7fb0c69c4751023e3f",
+            "macos": "1:242888999854:ios:6bfa7fb0c69c4751023e3f",
+            "web": "1:242888999854:web:4ec96950b0e475de023e3f",
+            "windows": "1:242888999854:web:c690868b26e92143023e3f"
+          }
+        }
+      }
+    }
+  }
+}
