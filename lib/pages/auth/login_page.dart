@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:serbisyo_ph/theme/colors.dart';
+import 'package:serbisyo_ph/theme/design_system.dart';
 import 'package:serbisyo_ph/pages/auth/signup_page.dart';
 import 'package:serbisyo_ph/navbars/home_navigation_bar.dart';
 import 'package:serbisyo_ph/navbars/provider_navigation_bar.dart';
@@ -40,7 +40,6 @@ class _LoginPageState extends State<LoginPage> {
         password: passwordController.text.trim(),
       );
 
-      // Get user role and navigate
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId != null) {
         final doc = await FirebaseFirestore.instance
@@ -98,174 +97,69 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: AppColors.kBackground,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: DS.spaceXl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 60),
+              const SizedBox(height: DS.space2xl),
 
-              /// HEADER
-              const Text(
-                "Serbisyo PH",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.kBlack,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                "Sign in to your account",
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.kGreyText,
-                  fontWeight: FontWeight.w500,
-                ),
+              DSText.displayLarge("Serbisyo PH"),
+              const SizedBox(height: DS.spaceSm),
+              DSText.bodySmall("Sign in to your account"),
+
+              const SizedBox(height: DS.space2xl),
+
+              DSInput(
+                controller: emailController,
+                label: "Email",
+                hint: "you@email.com",
+                prefixIcon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
               ),
 
-              const SizedBox(height: 48),
+              const SizedBox(height: DS.spaceLg),
 
-              /// EMAIL
-              const Text(
-                "Email",
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                  color: AppColors.kBlack,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.kWhite,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.kBorder),
-                ),
-                child: TextField(
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  onSubmitted: (_) => FocusScope.of(context).nextFocus(),
-                  cursorColor: AppColors.kBlack,
-                  decoration: const InputDecoration(
-                    hintText: "you@email.com",
-                    hintStyle: TextStyle(color: AppColors.kGreyText),
-                    prefixIcon: Icon(
-                      Icons.email_outlined,
-                      color: AppColors.kBlack,
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 16),
+              DSInput(
+                controller: passwordController,
+                label: "Password",
+                hint: "••••••••",
+                prefixIcon: Icons.lock_outline,
+                obscureText: _obscurePassword,
+                textInputAction: TextInputAction.done,
+                onSubmitted: login,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: AppColors.kGreyText,
+                    size: DS.iconMd,
                   ),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
                 ),
               ),
 
-              const SizedBox(height: 20),
-
-              /// PASSWORD
-              const Text(
-                "Password",
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                  color: AppColors.kBlack,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.kWhite,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.kBorder),
-                ),
-                child: TextField(
-                  controller: passwordController,
-                  obscureText: _obscurePassword,
-                  cursorColor: AppColors.kBlack,
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => login(),
-                  decoration: InputDecoration(
-                    hintText: "••••••••",
-                    hintStyle: const TextStyle(color: AppColors.kGreyText),
-                    prefixIcon: const Icon(
-                      Icons.lock_outline,
-                      color: AppColors.kBlack,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        color: AppColors.kGreyText,
-                      ),
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
-              ),
-
-              /// ERROR MESSAGE
               if (_errorMessage != null) ...[
-                const SizedBox(height: 12),
-                Text(
-                  _errorMessage!,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                const SizedBox(height: DS.spaceMd),
+                DSText.bodySmall(_errorMessage!, color: Colors.red),
               ],
 
-              const SizedBox(height: 32),
+              const SizedBox(height: DS.spaceXl),
 
-              /// LOGIN BUTTON
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _loading ? null : login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.kBlack,
-                    foregroundColor: AppColors.kWhite,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: _loading
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            color: AppColors.kWhite,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text(
-                          "Sign In",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                ),
+              DSButton.primary(
+                label: "Sign In",
+                onPressed: _loading ? null : login,
+                loading: _loading,
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: DS.spaceLg),
 
-              /// SIGN UP LINK
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    "Don't have an account? ",
-                    style: TextStyle(color: AppColors.kGreyText, fontSize: 13),
-                  ),
+                  DSText.bodySmall("Don't have an account? "),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -275,19 +169,12 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       );
                     },
-                    child: const Text(
-                      "Sign Up",
-                      style: TextStyle(
-                        color: AppColors.kBlack,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    child: DSText.bodySmall("Sign Up", color: AppColors.kBlack),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: DS.space2xl),
             ],
           ),
         ),

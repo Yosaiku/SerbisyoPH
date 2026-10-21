@@ -4,8 +4,7 @@ import 'package:serbisyo_ph/pages/provider/provider_orders.dart';
 import 'package:serbisyo_ph/pages/provider/provider_settings.dart';
 import 'package:serbisyo_ph/pages/provider/provider_home_page.dart';
 import 'package:serbisyo_ph/pages/notifications/notifications_page.dart';
-import 'package:serbisyo_ph/navbars/nav_bar_item.dart';
-import 'package:serbisyo_ph/theme/colors.dart';
+import 'package:serbisyo_ph/theme/design_system.dart';
 
 class ProviderNavigationBar extends StatefulWidget {
   const ProviderNavigationBar({super.key});
@@ -25,34 +24,29 @@ class _ProviderNavigationBarState extends State<ProviderNavigationBar> {
         children: [
           if (currentPageIndex > 0)
             Container(
-              padding: const EdgeInsets.fromLTRB(20, 50, 20, 28),
+              padding: const EdgeInsets.fromLTRB(DS.spaceLg, 50, DS.spaceLg, DS.spaceLg),
               decoration: const BoxDecoration(
                 color: AppColors.kBlack,
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(28),
-                  bottomRight: Radius.circular(28),
+                  bottomLeft: Radius.circular(DS.radiusXl),
+                  bottomRight: Radius.circular(DS.radiusXl),
                 ),
               ),
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(
+                    child: DSText.headlineMedium(
                       currentPageIndex == 1
                           ? "INCOMING ORDERS"
                           : currentPageIndex == 2
-                          ? "MY ORDERS"
-                          : "NOTIFICATIONS",
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: AppColors.kWhite,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
-                      ),
+                              ? "MY ORDERS"
+                              : "NOTIFICATIONS",
+                      color: AppColors.kWhite,
                     ),
                   ),
                   if (currentPageIndex > 0)
-                    GestureDetector(
-                      onTap: () {
+                    IconButton(
+                      onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -60,13 +54,7 @@ class _ProviderNavigationBarState extends State<ProviderNavigationBar> {
                           ),
                         );
                       },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Icons.settings,
-                          color: AppColors.kWhite,
-                        ),
-                      ),
+                      icon: const Icon(Icons.settings, color: AppColors.kWhite, size: DS.iconMd),
                     ),
                 ],
               ),
@@ -90,25 +78,25 @@ class _ProviderNavigationBarState extends State<ProviderNavigationBar> {
         indicatorColor: AppColors.kBlack,
         selectedIndex: currentPageIndex,
         destinations: const <Widget>[
-          NavBarItem(
+          DSNavDestination(
             label: "Home",
-            iconWhenSelected: Icons.home,
-            iconWhenIdle: Icons.home_outlined,
+            selectedIcon: Icons.home,
+            unselectedIcon: Icons.home_outlined,
           ),
-          NavBarItem(
+          DSNavDestination(
             label: "Incoming",
-            iconWhenSelected: Icons.inbox,
-            iconWhenIdle: Icons.inbox_outlined,
+            selectedIcon: Icons.inbox,
+            unselectedIcon: Icons.inbox_outlined,
           ),
-          NavBarItem(
+          DSNavDestination(
             label: "My Orders",
-            iconWhenSelected: Icons.list_alt,
-            iconWhenIdle: Icons.list_alt_outlined,
+            selectedIcon: Icons.list_alt,
+            unselectedIcon: Icons.list_alt_outlined,
           ),
-          NavBarItem(
+          DSNavDestination(
             label: "Alerts",
-            iconWhenSelected: Icons.notifications,
-            iconWhenIdle: Icons.notifications_outlined,
+            selectedIcon: Icons.notifications,
+            unselectedIcon: Icons.notifications_outlined,
           ),
         ],
       ),

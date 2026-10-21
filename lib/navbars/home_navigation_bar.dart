@@ -3,8 +3,7 @@ import 'package:serbisyo_ph/pages/active_orders/active_orders.dart';
 import 'package:serbisyo_ph/pages/home/home.dart';
 import 'package:serbisyo_ph/pages/home/map_view.dart';
 import 'package:serbisyo_ph/pages/notifications/notifications_page.dart';
-import 'package:serbisyo_ph/navbars/nav_bar_item.dart';
-import 'package:serbisyo_ph/theme/colors.dart';
+import 'package:serbisyo_ph/theme/design_system.dart';
 
 class HomeNavigationBar extends StatefulWidget {
   const HomeNavigationBar({super.key});
@@ -35,25 +34,25 @@ class _HomeNavigationBarState extends State<HomeNavigationBar> {
         indicatorColor: AppColors.kBlack,
         selectedIndex: currentPageIndex,
         destinations: const <Widget>[
-          NavBarItem(
+          DSNavDestination(
             label: "Home",
-            iconWhenSelected: Icons.home,
-            iconWhenIdle: Icons.home_outlined,
+            selectedIcon: Icons.home,
+            unselectedIcon: Icons.home_outlined,
           ),
-          NavBarItem(
+          DSNavDestination(
             label: "Map",
-            iconWhenSelected: Icons.map,
-            iconWhenIdle: Icons.map_outlined,
+            selectedIcon: Icons.map,
+            unselectedIcon: Icons.map_outlined,
           ),
-          NavBarItem(
+          DSNavDestination(
             label: "Orders",
-            iconWhenSelected: Icons.list,
-            iconWhenIdle: Icons.list_outlined,
+            selectedIcon: Icons.list,
+            unselectedIcon: Icons.list_outlined,
           ),
-          NavBarItem(
+          DSNavDestination(
             label: "Alerts",
-            iconWhenSelected: Icons.notifications,
-            iconWhenIdle: Icons.notifications_outlined,
+            selectedIcon: Icons.notifications,
+            unselectedIcon: Icons.notifications_outlined,
           ),
         ],
       ),

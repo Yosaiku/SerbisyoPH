@@ -6,7 +6,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:serbisyo_ph/pages/find-service/find_service.dart';
 import 'package:serbisyo_ph/pages/active_orders/order_details_page.dart';
 import 'package:serbisyo_ph/pages/settings/settings_page.dart';
-import 'package:serbisyo_ph/theme/colors.dart';
+import 'package:serbisyo_ph/theme/design_system.dart';
 import 'package:serbisyo_ph/utilities/service_icons.dart';
 
 class HomePage extends StatefulWidget {
@@ -120,8 +120,8 @@ class _HomePageState extends State<HomePage> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(
-            padding: EdgeInsets.all(20),
-            child: Center(child: CircularProgressIndicator()),
+            padding: EdgeInsets.all(DS.spaceLg),
+            child: Center(child: CircularProgressIndicator(color: AppColors.kBlack)),
           );
         }
 
@@ -138,7 +138,7 @@ class _HomePageState extends State<HomePage> {
           height: 110,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: DS.spaceLg),
             itemCount: orders.length,
             itemBuilder: (context, index) {
               final order = orders[index];
@@ -159,26 +159,18 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildEmptyOrdersCard(String message) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.kWhite,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.kBorder),
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: DS.spaceLg),
+      child: DSCard(
+        padding: const EdgeInsets.all(DS.spaceLg),
         child: Row(
           children: [
             Icon(
               Icons.receipt_long_outlined,
               color: AppColors.kBorder,
-              size: 32,
+              size: DS.iconLg,
             ),
-            const SizedBox(width: 12),
-            Text(
-              message,
-              style: const TextStyle(color: AppColors.kGreyText, fontSize: 14),
-            ),
+            const SizedBox(width: DS.spaceMd),
+            DSText.bodySmall(message),
           ],
         ),
       ),
@@ -186,29 +178,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildOrderCard(String service, String status, String orderId) {
-    Color statusColor;
-    String statusText;
     IconData icon;
 
     icon = serviceIcon(service);
-
-    switch (status) {
-      case 'pending':
-        statusColor = Colors.orange;
-        statusText = 'Searching...';
-        break;
-      case 'accepted':
-        statusColor = Colors.blue;
-        statusText = 'Accepted';
-        break;
-      case 'in_progress':
-        statusColor = Colors.purple;
-        statusText = 'In Progress';
-        break;
-      default:
-        statusColor = AppColors.kGreyText;
-        statusText = status;
-    }
 
     return GestureDetector(
       onTap: () {
@@ -221,49 +193,28 @@ class _HomePageState extends State<HomePage> {
       },
       child: Container(
         width: 160,
-        margin: const EdgeInsets.only(right: 12),
-        padding: const EdgeInsets.all(14),
+        margin: const EdgeInsets.only(right: DS.spaceMd),
+        padding: const EdgeInsets.all(DS.spaceMd),
         decoration: BoxDecoration(
           color: AppColors.kWhite,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(DS.radiusLg),
           border: Border.all(color: AppColors.kBorder),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(DS.spaceSm),
               decoration: BoxDecoration(
                 color: AppColors.kBlack,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(DS.radiusMd),
               ),
-              child: Icon(icon, color: AppColors.kWhite, size: 18),
+              child: Icon(icon, color: AppColors.kWhite, size: DS.iconSm),
             ),
-            const SizedBox(height: 10),
-            Text(
-              service,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppColors.kBlack,
-              ),
-            ),
+            const SizedBox(height: DS.spaceMd),
+            DSText.titleMedium(service),
             const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                statusText,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: statusColor,
-                ),
-              ),
-            ),
+            DSStatusBadge(status: status),
           ],
         ),
       ),
@@ -288,7 +239,7 @@ class _HomePageState extends State<HomePage> {
           height: 120,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: DS.spaceLg),
             itemCount: promotions.length,
             itemBuilder: (context, index) {
               final doc = promotions[index];
@@ -327,12 +278,12 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 50, 20, 28),
+            padding: const EdgeInsets.fromLTRB(DS.spaceLg, 50, DS.spaceLg, DS.spaceLg),
             decoration: const BoxDecoration(
               color: AppColors.kBlack,
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(28),
-                bottomRight: Radius.circular(28),
+                bottomLeft: Radius.circular(DS.radiusXl),
+                bottomRight: Radius.circular(DS.radiusXl),
               ),
             ),
             child: Row(
@@ -341,33 +292,17 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "YOUR LOCATION",
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.white70,
-                          letterSpacing: 1.2,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
+                      DSText.caption("YOUR LOCATION"),
+                      const SizedBox(height: DS.spaceXs),
                       GestureDetector(
                         onTap: _loadUserLocation,
-                        child: Text(
-                          _userLocation,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: AppColors.kWhite,
-                            fontWeight: FontWeight.w800,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
+                        child: DSText.headlineLarge(_userLocation, color: AppColors.kWhite),
                       ),
                     ],
                   ),
                 ),
-                GestureDetector(
-                  onTap: () {
+                IconButton(
+                  onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -375,14 +310,13 @@ class _HomePageState extends State<HomePage> {
                       ),
                     );
                   },
-                  child: Container(
-                    height: 42,
-                    width: 42,
-                    decoration: BoxDecoration(
-                      color: Colors.white12,
-                      borderRadius: BorderRadius.circular(12),
+                  icon: const Icon(Icons.settings, color: AppColors.kWhite, size: DS.iconMd),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.white12,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(DS.radiusMd),
                     ),
-                    child: const Icon(Icons.settings, color: AppColors.kWhite),
+                    fixedSize: const Size(42, 42),
                   ),
                 ),
               ],
@@ -395,46 +329,37 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 10),
+                  const SizedBox(height: DS.spaceMd),
 
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: DS.spaceLg),
                     child: Column(
                       children: [
-                        const SizedBox(height: 20),
-                        Text(
-                          _loading ? 'Loading...' : 'Hi $_userName!',
-                          textDirection: TextDirection.ltr,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: AppColors.kBlack,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: DS.spaceLg),
+                        DSText.headlineLarge(_loading ? 'Loading...' : 'Hi $_userName!'),
+                        const SizedBox(height: DS.spaceLg),
 
                         Container(
                           decoration: BoxDecoration(
                             color: AppColors.kWhite,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(DS.radiusXl),
                             border: Border.all(color: AppColors.kBorder),
                           ),
                           child: TextField(
                             cursorColor: AppColors.kBlack,
                             decoration: InputDecoration(
                               hintText: "What service do you need?",
-                              hintStyle: const TextStyle(
-                                color: AppColors.kGreyText,
-                                fontSize: 14,
-                              ),
+                              hintStyle: DS.bodySmall,
                               prefixIcon: const Icon(
                                 Icons.search,
                                 color: AppColors.kBlack,
+                                size: DS.iconMd,
                               ),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(DS.radiusXl),
                                 borderSide: BorderSide.none,
                               ),
+                              contentPadding: const EdgeInsets.symmetric(vertical: DS.spaceMd),
                             ),
                           ),
                         ),
@@ -442,28 +367,23 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: DS.space2xl),
 
                   const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      "Services",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.kBlack,
-                      ),
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: DS.spaceLg),
+                    child: DSSectionHeader(title: "Services"),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: DS.spaceLg),
 
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: DS.spaceLg),
                     child: GridView.count(
                       crossAxisCount: 4,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: DS.spaceMd,
+                      crossAxisSpacing: DS.spaceMd,
                       children: [
                         ServiceItem(
                           icon: Icons.local_laundry_service_outlined,
@@ -511,45 +431,31 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: DS.space2xl),
 
                   const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      "Active Orders",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.kBlack,
-                      ),
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: DS.spaceLg),
+                    child: DSSectionHeader(title: "Active Orders"),
                   ),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: DS.spaceMd),
 
                   _buildActiveOrdersSection(),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: DS.space2xl),
 
                   const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      "Nearby Services",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.kBlack,
-                      ),
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: DS.spaceLg),
+                    child: DSSectionHeader(title: "Nearby Services"),
                   ),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: DS.spaceMd),
 
                   SizedBox(
                     height: 50,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: DS.spaceLg),
                       children: const [
                         ProviderCard(name: "QuickWash"),
                         ProviderCard(name: "AquaPure"),
@@ -559,25 +465,18 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: DS.space2xl),
 
                   const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      "Promotions",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.kBlack,
-                      ),
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: DS.spaceLg),
+                    child: DSSectionHeader(title: "Promotions"),
                   ),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: DS.spaceMd),
 
                   _buildPromotionsSection(),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: DS.space2xl),
                 ],
               ),
             ),
@@ -602,8 +501,9 @@ class ServiceItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(DS.radiusLg),
       child: Column(
         children: [
           Container(
@@ -611,20 +511,13 @@ class ServiceItem extends StatelessWidget {
             width: 56,
             decoration: BoxDecoration(
               color: AppColors.kWhite,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(DS.radiusLg),
               border: Border.all(color: AppColors.kBorder),
             ),
-            child: Icon(icon, color: AppColors.kBlack, size: 26),
+            child: Icon(icon, color: AppColors.kBlack, size: DS.iconLg),
           ),
-          const SizedBox(height: 10),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColors.kBlack,
-            ),
-          ),
+          const SizedBox(height: DS.spaceMd),
+          DSText.labelSmall(label, align: TextAlign.center),
         ],
       ),
     );
@@ -639,25 +532,23 @@ class ProviderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.symmetric(horizontal: DS.spaceMd, vertical: DS.spaceSm),
+      margin: const EdgeInsets.only(right: DS.spaceMd),
       decoration: BoxDecoration(
         color: AppColors.kWhite,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(DS.radiusFull),
         border: Border.all(color: AppColors.kBorder),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.storefront_outlined, size: 18),
-          const SizedBox(width: 6),
-          Text(
-            name,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-          ),
-          const SizedBox(width: 6),
-          const Icon(Icons.star, size: 14),
-          const SizedBox(width: 2),
-          const Text("4.8", style: TextStyle(fontSize: 12)),
+          const Icon(Icons.storefront_outlined, size: DS.iconSm),
+          const SizedBox(width: DS.spaceXs),
+          DSText.labelMedium(name),
+          const SizedBox(width: DS.spaceXs),
+          const Icon(Icons.star, size: DS.iconXs),
+          const SizedBox(width: DS.spaceXs),
+          DSText.labelSmall("4.8"),
         ],
       ),
     );
@@ -680,41 +571,24 @@ class PromotionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 180,
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(right: DS.spaceMd),
+      padding: const EdgeInsets.all(DS.spaceLg),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [color, color.withValues(alpha: 0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(DS.radiusLg),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-              color: AppColors.kWhite,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: const TextStyle(fontSize: 12, color: AppColors.kWhite),
-          ),
+          DSText.headlineMedium(title, color: AppColors.kWhite),
+          const SizedBox(height: DS.spaceXs),
+          DSText.bodySmall(subtitle, color: AppColors.kWhite),
           const Spacer(),
-          const Text(
-            "Tap to avail",
-            style: TextStyle(
-              fontSize: 10,
-              color: AppColors.kWhite,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          DSText.labelSmall("Tap to avail", color: AppColors.kWhite),
         ],
       ),
     );

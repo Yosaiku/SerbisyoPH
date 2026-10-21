@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:serbisyo_ph/pages/provider/provider_settings.dart';
 import 'package:serbisyo_ph/pages/provider/provider_album_page.dart';
 import 'package:serbisyo_ph/maps/map_picker.dart';
-import 'package:serbisyo_ph/theme/colors.dart';
+import 'package:serbisyo_ph/theme/design_system.dart';
 
 class ProviderHomePage extends StatefulWidget {
   const ProviderHomePage({super.key});
@@ -157,11 +157,11 @@ class _ProviderHomePageState extends State<ProviderHomePage> {
             .collection('users')
             .doc(userId)
             .update({
-              'address': result['address'],
-              'lat': result['lat'],
-              'lng': result['lng'],
-              'has_location': true,
-            });
+          'address': result['address'],
+          'lat': result['lat'],
+          'lng': result['lng'],
+          'has_location': true,
+        });
 
         setState(() {
           _businessAddress = result['address'];
@@ -173,6 +173,7 @@ class _ProviderHomePageState extends State<ProviderHomePage> {
           const SnackBar(
             content: Text("Location set! You're now visible on the map."),
             backgroundColor: AppColors.kBlack,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -192,123 +193,97 @@ class _ProviderHomePageState extends State<ProviderHomePage> {
       body: Column(
         children: [
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 50, 20, 28),
+            padding: const EdgeInsets.fromLTRB(DS.spaceLg, 50, DS.spaceLg, DS.spaceLg),
             decoration: const BoxDecoration(
               color: AppColors.kBlack,
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(28),
-                bottomRight: Radius.circular(28),
+                bottomLeft: Radius.circular(DS.radiusXl),
+                bottomRight: Radius.circular(DS.radiusXl),
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                _providerName,
-                                style: const TextStyle(
-                                  fontSize: 22,
-                                  color: AppColors.kWhite,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: _isOnline
-                                      ? Colors.green
-                                      : Colors.red.withValues(alpha: 0.7),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  _isOnline ? "Online" : "Offline",
-                                  style: const TextStyle(
-                                    fontSize: 10,
-                                    color: AppColors.kWhite,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(Icons.star, color: Colors.orange, size: 14),
-                              const SizedBox(width: 2),
-                              Text(
-                                _rating > 0
-                                    ? _rating.toStringAsFixed(1)
-                                    : "No ratings yet",
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _businessAddress.isNotEmpty
-                                ? _businessAddress
-                                : 'No address set',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.white70,
+                          DSText.headlineMedium(_providerName, color: AppColors.kWhite),
+                          const SizedBox(width: DS.spaceSm),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: DS.spaceSm,
+                              vertical: DS.spaceXs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _isOnline
+                                  ? Colors.green
+                                  : Colors.red.withValues(alpha: 0.7),
+                              borderRadius: BorderRadius.circular(DS.radiusFull),
+                            ),
+                            child: DSText.labelSmall(
+                              _isOnline ? "Online" : "Offline",
+                              color: AppColors.kWhite,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ProviderSettingsPage(),
+                      const SizedBox(height: DS.spaceXs),
+                      Row(
+                        children: [
+                          Icon(Icons.star, color: Colors.orange, size: DS.iconSm),
+                          const SizedBox(width: DS.spaceXs),
+                          DSText.bodyMedium(
+                            _rating > 0
+                                ? _rating.toStringAsFixed(1)
+                                : "No ratings yet",
+                            color: Colors.white70,
                           ),
-                        );
-                      },
-                      child: Container(
-                        height: 42,
-                        width: 42,
-                        decoration: BoxDecoration(
-                          color: Colors.white12,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.settings,
-                          color: AppColors.kWhite,
-                        ),
+                        ],
                       ),
+                      const SizedBox(height: DS.spaceXs),
+                      DSText.bodySmall(
+                        _businessAddress.isNotEmpty
+                            ? _businessAddress
+                            : 'No address set',
+                        color: Colors.white70,
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProviderSettingsPage(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.settings, color: AppColors.kWhite, size: DS.iconMd),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.white12,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(DS.radiusMd),
                     ),
-                  ],
+                    fixedSize: const Size(42, 42),
+                  ),
                 ),
               ],
             ),
           ),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(DS.spaceLg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 10),
+                  const SizedBox(height: DS.spaceMd),
                   _buildLocationBanner(),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: DS.spaceLg),
                   _buildStatsSection(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: DS.spaceXl),
                   _buildQuickActionsSection(),
                 ],
               ),
@@ -321,39 +296,27 @@ class _ProviderHomePageState extends State<ProviderHomePage> {
 
   Widget _buildLocationBanner() {
     if (_hasLocation) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.green.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
-        ),
+      return DSCard(
+        padding: const EdgeInsets.all(DS.spaceLg),
+        color: Colors.green.withValues(alpha: 0.05),
+        border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(DS.spaceSm),
               decoration: BoxDecoration(
                 color: Colors.green.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(DS.radiusMd),
               ),
-              child: const Icon(Icons.check_circle, color: Colors.green),
+              child: const Icon(Icons.check_circle, color: Colors.green, size: DS.iconMd),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: DS.spaceLg),
             const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "You're on the map!",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: Colors.green,
-                    ),
-                  ),
-                  Text(
-                    "Customers can find you",
-                    style: TextStyle(fontSize: 12, color: Colors.green),
-                  ),
+                  DSText.titleMedium("You're on the map!", color: Colors.green),
+                  DSText.bodySmall("Customers can find you", color: Colors.green),
                 ],
               ),
             ),
@@ -362,53 +325,34 @@ class _ProviderHomePageState extends State<ProviderHomePage> {
       );
     }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-      ),
+    return DSCard(
+      padding: const EdgeInsets.all(DS.spaceLg),
+      color: Colors.orange.withValues(alpha: 0.05),
+      border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(DS.spaceSm),
             decoration: BoxDecoration(
               color: Colors.orange.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(DS.radiusMd),
             ),
-            child: const Icon(Icons.location_off, color: Colors.orange),
+            child: const Icon(Icons.location_off, color: Colors.orange, size: DS.iconMd),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: DS.spaceLg),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Set your location",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.orange,
-                  ),
-                ),
-                Text(
-                  "Add your location to appear on the map",
-                  style: TextStyle(fontSize: 12, color: Colors.orange),
-                ),
+                DSText.titleMedium("Set your location", color: Colors.orange),
+                DSText.bodySmall("Add your location to appear on the map", color: Colors.orange),
               ],
             ),
           ),
-          ElevatedButton(
+          DSButton.primary(
+            label: "Set",
             onPressed: _setLocation,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text("Set"),
+            height: DS.btnHeightSm,
           ),
         ],
       ),
@@ -419,29 +363,21 @@ class _ProviderHomePageState extends State<ProviderHomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "TODAY'S STATS",
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            color: AppColors.kBlack,
-            letterSpacing: 1.2,
-          ),
-        ),
-        const SizedBox(height: 12),
+        DSSectionHeader(title: "Today's Stats"),
+        const SizedBox(height: DS.spaceMd),
         Row(
           children: [
             Expanded(
-              child: _buildStatCard(
+              child: DSStatCard(
                 icon: Icons.receipt_long,
                 value: _todayOrders.toString(),
                 label: "Orders",
                 color: AppColors.kBlack,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: DS.spaceMd),
             Expanded(
-              child: _buildStatCard(
+              child: DSStatCard(
                 icon: Icons.attach_money,
                 value: "₱$_totalEarnings",
                 label: "Earnings",
@@ -450,7 +386,7 @@ class _ProviderHomePageState extends State<ProviderHomePage> {
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: DS.spaceXl),
         _buildEarningsHistory(),
       ],
     );
@@ -462,43 +398,17 @@ class _ProviderHomePageState extends State<ProviderHomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "EARNINGS HISTORY",
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            color: AppColors.kBlack,
-            letterSpacing: 1.2,
-          ),
-        ),
-        const SizedBox(height: 12),
+        DSSectionHeader(title: "Earnings History"),
+        const SizedBox(height: DS.spaceMd),
         ..._earningsHistory.map(
-          (item) => Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.kWhite,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.kBorder),
-            ),
+          (item) => DSCard(
+            padding: const EdgeInsets.all(DS.spaceLg),
+            margin: const EdgeInsets.only(bottom: DS.spaceMd),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  item['period'],
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.kBlack,
-                  ),
-                ),
-                Text(
-                  "₱${item['amount']}",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.green,
-                    fontSize: 16,
-                  ),
-                ),
+                DSText.titleMedium(item['period']),
+                DSText.headlineMedium("₱${item['amount']}", color: Colors.green),
               ],
             ),
           ),
@@ -507,48 +417,13 @@ class _ProviderHomePageState extends State<ProviderHomePage> {
     );
   }
 
-  Widget _buildStatCard({
-    required IconData icon,
-    required String value,
-    required String label,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.kWhite,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.kBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: color,
-            ),
-          ),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, color: AppColors.kGreyText),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildQuickActionsSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle("Quick Actions"),
-        const SizedBox(height: 12),
-        _buildActionTile(
+        DSSectionHeader(title: "Quick Actions"),
+        const SizedBox(height: DS.spaceMd),
+        DSActionTile(
           icon: Icons.storefront,
           title: "Business Profile",
           subtitle: "Update your business details",
@@ -561,13 +436,15 @@ class _ProviderHomePageState extends State<ProviderHomePage> {
             );
           },
         ),
-        _buildActionTile(
+        const SizedBox(height: DS.spaceMd),
+        DSActionTile(
           icon: Icons.map,
           title: "Location",
           subtitle: _hasLocation ? "Update your location" : "Set your location",
           onTap: _setLocation,
         ),
-        _buildActionTile(
+        const SizedBox(height: DS.spaceMd),
+        DSActionTile(
           icon: Icons.photo_library,
           title: "Photo Album",
           subtitle: "Showcase your work",
@@ -581,73 +458,6 @@ class _ProviderHomePageState extends State<ProviderHomePage> {
           },
         ),
       ],
-    );
-  }
-
-  Widget _buildActionTile({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.kWhite,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.kBorder),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.kBlack.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: AppColors.kBlack),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.kBlack,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.kGreyText,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: AppColors.kGreyText),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: AppColors.kGreyText,
-        letterSpacing: 0.8,
-      ),
     );
   }
 }

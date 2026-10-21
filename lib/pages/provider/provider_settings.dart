@@ -5,7 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:serbisyo_ph/pages/auth/login_page.dart';
 import 'package:serbisyo_ph/maps/map_picker.dart';
-import 'package:serbisyo_ph/theme/colors.dart';
+import 'package:serbisyo_ph/theme/design_system.dart';
 
 class ProviderSettingsPage extends StatefulWidget {
   const ProviderSettingsPage({super.key});
@@ -245,22 +245,9 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
 
     return Scaffold(
       backgroundColor: AppColors.kBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.kBlack),
-        title: const Text(
-          "Settings",
-          style: TextStyle(
-            color: AppColors.kBlack,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-      ),
+      appBar: DSAppBar(title: "Settings"),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(DS.spaceLg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -268,60 +255,53 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
               child: Column(
                 children: [
                   Container(
-                    height: 60,
-                    width: 60,
+                    height: DS.avatarLg,
+                    width: DS.avatarLg,
                     decoration: BoxDecoration(
                       color: AppColors.kBlack,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(DS.radiusLg),
                     ),
                     child: const Icon(
                       Icons.storefront,
                       color: AppColors.kWhite,
-                      size: 28,
+                      size: DS.iconXl,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "Provider Profile",
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.kBlack,
-                    ),
-                  ),
+                  const SizedBox(height: DS.spaceMd),
+                  DSText.labelMedium("Provider Profile", color: AppColors.kBlack),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            _buildSectionTitle("Account Information"),
-            const SizedBox(height: 12),
-            _buildTextField(
+            const SizedBox(height: DS.spaceXl),
+            DSSectionHeader(title: "Account Information"),
+            const SizedBox(height: DS.spaceMd),
+            DSInput(
               controller: _nameController,
               label: "Business Name",
-              icon: Icons.storefront_outlined,
+              prefixIcon: Icons.storefront_outlined,
             ),
-            const SizedBox(height: 12),
-            _buildTextField(
+            const SizedBox(height: DS.spaceMd),
+            DSInput(
               controller: _phoneController,
               label: "Phone Number",
-              icon: Icons.phone_outlined,
+              prefixIcon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
             ),
-            const SizedBox(height: 12),
-            _buildTextField(
+            const SizedBox(height: DS.spaceMd),
+            DSInput(
               controller: _descriptionController,
               label: "Description (optional)",
-              icon: Icons.description_outlined,
+              prefixIcon: Icons.description_outlined,
               maxLines: 3,
             ),
-            const SizedBox(height: 24),
-            _buildSectionTitle("Service Type"),
-            const SizedBox(height: 12),
+            const SizedBox(height: DS.spaceXl),
+            DSSectionHeader(title: "Service Type"),
+            const SizedBox(height: DS.spaceMd),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: DS.spaceLg),
               decoration: BoxDecoration(
                 color: AppColors.kWhite,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(DS.radiusMd),
                 border: Border.all(color: AppColors.kBorder),
               ),
               child: DropdownButtonHideUnderline(
@@ -331,7 +311,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                   items: _services.map((service) {
                     return DropdownMenuItem(
                       value: service,
-                      child: Text(service),
+                      child: DSText.bodyMedium(service),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -342,51 +322,40 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-            _buildSectionTitle("Availability"),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.kWhite,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.kBorder),
-              ),
+            const SizedBox(height: DS.spaceXl),
+            DSSectionHeader(title: "Availability"),
+            const SizedBox(height: DS.spaceMd),
+            DSCard(
+              padding: const EdgeInsets.all(DS.spaceLg),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(DS.spaceSm),
                     decoration: BoxDecoration(
                       color: _isOnline
                           ? Colors.green.withValues(alpha: 0.1)
                           : Colors.red.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(DS.radiusMd),
                     ),
                     child: Icon(
                       _isOnline ? Icons.check_circle : Icons.pause_circle,
                       color: _isOnline ? Colors.green : Colors.red,
+                      size: DS.iconMd,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: DS.spaceMd),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        DSText.titleMedium(
                           _isOnline ? "Online" : "Offline",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: _isOnline ? Colors.green : Colors.red,
-                          ),
+                          color: _isOnline ? Colors.green : Colors.red,
                         ),
-                        Text(
+                        DSText.bodySmall(
                           _isOnline
                               ? "You're visible to customers"
                               : "You're hidden from customers",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.kGreyText,
-                          ),
                         ),
                       ],
                     ),
@@ -401,14 +370,11 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                             .collection('users')
                             .doc(userId)
                             .update({'is_online': value});
-                        if (mounted) {
-                          // ignore: use_build_context_synchronously
+                        if (mounted && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                value
-                                    ? "You're now online!"
-                                    : "You're now offline",
+                                value ? "You're now online!" : "You're now offline",
                               ),
                               backgroundColor: AppColors.kBlack,
                               behavior: SnackBarBehavior.floating,
@@ -422,16 +388,11 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            _buildSectionTitle("Location"),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.kWhite,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.kBorder),
-              ),
+            const SizedBox(height: DS.spaceXl),
+            DSSectionHeader(title: "Location"),
+            const SizedBox(height: DS.spaceMd),
+            DSCard(
+              padding: const EdgeInsets.all(DS.spaceLg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -444,36 +405,28 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                           color: _hasLocation
                               ? Colors.green.withValues(alpha: 0.1)
                               : Colors.orange.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(DS.radiusMd),
                         ),
                         child: Icon(
                           _hasLocation
                               ? Icons.check_circle
                               : Icons.location_off,
                           color: _hasLocation ? Colors.green : Colors.orange,
+                          size: DS.iconMd,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: DS.spaceMd),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            DSText.titleMedium(
                               _hasLocation ? "Location Set" : "No Location Set",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: _hasLocation
-                                    ? Colors.green
-                                    : Colors.orange,
-                              ),
+                              color: _hasLocation ? Colors.green : Colors.orange,
                             ),
                             if (_currentAddress.isNotEmpty)
-                              Text(
+                              DSText.bodySmall(
                                 _currentAddress,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.kGreyText,
-                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -482,36 +435,22 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: DS.spaceLg),
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton.icon(
+                        child: DSButton.secondary(
+                          label: "Use Current",
+                          icon: Icons.my_location,
                           onPressed: _useCurrentLocation,
-                          icon: const Icon(Icons.my_location, size: 18),
-                          label: const Text("Use Current"),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.kBlack,
-                            side: const BorderSide(color: AppColors.kBorder),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: DS.spaceMd),
                       Expanded(
-                        child: ElevatedButton.icon(
+                        child: DSButton.primary(
+                          label: "Pick on Map",
+                          icon: Icons.map,
                           onPressed: _updateLocation,
-                          icon: const Icon(Icons.map, size: 18),
-                          label: const Text("Pick on Map"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.kBlack,
-                            foregroundColor: AppColors.kWhite,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
                         ),
                       ),
                     ],
@@ -519,169 +458,69 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _saving ? null : _saveProfile,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.kBlack,
-                  foregroundColor: AppColors.kWhite,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                child: _saving
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.kWhite,
-                        ),
-                      )
-                    : const Text(
-                        "Save Profile",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-              ),
+            const SizedBox(height: DS.spaceXl),
+            DSButton.primary(
+              label: "Save Profile",
+              onPressed: _saving ? null : _saveProfile,
+              loading: _saving,
             ),
-            const SizedBox(height: 24),
-            _buildSectionTitle("Business Hours"),
-            const SizedBox(height: 12),
+            const SizedBox(height: DS.spaceXl),
+            DSSectionHeader(title: "Business Hours"),
+            const SizedBox(height: DS.spaceMd),
             _buildBusinessHoursSection(),
-            const SizedBox(height: 24),
-            _buildSectionTitle("My Promotions"),
-            const SizedBox(height: 12),
+            const SizedBox(height: DS.spaceXl),
+            DSSectionHeader(title: "My Promotions"),
+            const SizedBox(height: DS.spaceMd),
             _buildPromotionsSection(),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: OutlinedButton(
-                onPressed: _logout,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red,
-                  side: const BorderSide(color: Colors.red),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  "Logout",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
+            const SizedBox(height: DS.spaceLg),
+            DSButton.outlinedDestructive(
+              label: "Logout",
+              onPressed: _logout,
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: DS.space2xl),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: AppColors.kGreyText,
-        letterSpacing: 0.8,
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType? keyboardType,
-    int maxLines = 1,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.kWhite,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.kBorder),
-      ),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        style: const TextStyle(fontSize: 14, color: AppColors.kBlack),
-        decoration: InputDecoration(
-          hintText: label,
-          hintStyle: const TextStyle(fontSize: 14, color: AppColors.kGreyText),
-          prefixIcon: Icon(icon, size: 18, color: AppColors.kGreyText),
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 12,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildBusinessHoursSection() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.kWhite,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.kBorder),
-      ),
+    return DSCard(
+      padding: const EdgeInsets.all(DS.spaceMd),
       child: Column(
         children: _businessHours.entries.map((entry) {
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: DS.spaceXs),
             child: Row(
               children: [
                 SizedBox(
                   width: 70,
-                  child: Text(
-                    entry.key,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.kBlack,
-                    ),
-                  ),
+                  child: DSText.labelSmall(entry.key),
                 ),
                 Expanded(
                   child: GestureDetector(
                     onTap: () => _showTimePickerDialog(entry.key),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
+                        horizontal: DS.spaceMd,
+                        vertical: DS.spaceSm,
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.kBackground,
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(DS.radiusSm),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                            child: Text(
+                            child: DSText.bodySmall(
                               entry.value,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: AppColors.kGreyText,
-                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: 4),
                           const Icon(
                             Icons.edit,
-                            size: 14,
+                            size: DS.iconSm,
                             color: AppColors.kGreyText,
                           ),
                         ],
@@ -702,8 +541,8 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text("$day Hours"),
+      builder: (context) => DSDialog(
+        title: "$day Hours",
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -719,11 +558,11 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
               child: Column(
                 children: [
                   ListTile(
-                    title: const Text("Open"),
+                    title: const DSText.bodyMedium("Open"),
                     leading: const Radio<bool>(value: false),
                   ),
                   ListTile(
-                    title: const Text("Closed"),
+                    title: const DSText.bodyMedium("Closed"),
                     leading: const Radio<bool>(value: true),
                   ),
                 ],
@@ -731,6 +570,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
             ),
           ],
         ),
+        actions: [],
       ),
     );
   }
@@ -751,41 +591,20 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
         return Column(
           children: [
             if (promotions.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.kWhite,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.kBorder),
-                ),
-                child: const Center(
-                  child: Text(
-                    "No promotions yet",
-                    style: TextStyle(color: AppColors.kGreyText),
-                  ),
-                ),
+              DSCard(
+                padding: const EdgeInsets.all(DS.spaceLg),
+                child: Center(child: DSText.bodySmall("No promotions yet")),
               )
             else
               ...promotions.map((doc) {
                 final data = doc.data() as Map<String, dynamic>;
                 return _buildPromotionCard(data, doc.id);
               }),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 44,
-              child: OutlinedButton.icon(
-                onPressed: () => _showAddPromotionDialog(context),
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text("Add Promotion"),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.kBlack,
-                  side: const BorderSide(color: AppColors.kBorder),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
+            const SizedBox(height: DS.spaceMd),
+            DSButton.secondary(
+              label: "Add Promotion",
+              icon: Icons.add,
+              onPressed: () => _showAddPromotionDialog(context),
             ),
           ],
         );
@@ -799,53 +618,29 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
     final discount = data['discount'] ?? '';
     final isActive = data['is_active'] ?? true;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.kWhite,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.kBorder),
-      ),
+    return DSCard(
+      padding: const EdgeInsets.all(DS.spaceMd),
+      margin: const EdgeInsets.only(bottom: DS.spaceMd),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(DS.spaceSm),
             decoration: BoxDecoration(
               color: Colors.green.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(DS.radiusMd),
             ),
-            child: const Icon(Icons.local_offer, color: Colors.green, size: 20),
+            child: const Icon(Icons.local_offer, color: Colors.green, size: DS.iconMd),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: DS.spaceMd),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.kBlack,
-                  ),
-                ),
+                DSText.titleMedium(title),
                 if (description.isNotEmpty)
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.kGreyText,
-                    ),
-                  ),
+                  DSText.bodySmall(description),
                 if (discount.isNotEmpty)
-                  Text(
-                    discount,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green,
-                    ),
-                  ),
+                  DSText.labelSmall(discount, color: Colors.green),
               ],
             ),
           ),
@@ -874,163 +669,83 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
       isScrollControlled: true,
       backgroundColor: AppColors.kWhite,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(DS.radiusXl)),
       ),
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
+      builder: (context) => DSModalBottomSheet(
+        title: "ADD PROMOTION",
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: DS.spaceLg),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.kBorder,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
+              const SizedBox(height: DS.spaceXl),
+              DSInput(
+                controller: titleController,
+                label: "Title",
+                hint: "e.g., Summer Sale",
+                prefixIcon: Icons.local_offer_outlined,
               ),
-              const SizedBox(height: 20),
-              const Text(
-                "ADD PROMOTION",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
-                ),
+              const SizedBox(height: DS.spaceMd),
+              DSInput(
+                controller: discountController,
+                label: "Discount",
+                hint: "e.g., 20% OFF",
+                prefixIcon: Icons.percent,
               ),
-              const SizedBox(height: 20),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.kWhite,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.kBorder),
-                ),
-                child: TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(
-                    labelText: "Title",
-                    hintText: "e.g., Summer Sale",
-                    prefixIcon: Icon(Icons.local_offer_outlined),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 14,
-                      horizontal: 16,
-                    ),
-                  ),
-                ),
+              const SizedBox(height: DS.spaceMd),
+              DSInput(
+                controller: descController,
+                label: "Description (optional)",
+                hint: "e.g., Valid for laundry services",
+                prefixIcon: Icons.description_outlined,
+                maxLines: 2,
               ),
-              const SizedBox(height: 12),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.kWhite,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.kBorder),
-                ),
-                child: TextField(
-                  controller: discountController,
-                  decoration: const InputDecoration(
-                    labelText: "Discount",
-                    hintText: "e.g., 20% OFF",
-                    prefixIcon: Icon(Icons.percent),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 14,
-                      horizontal: 16,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.kWhite,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.kBorder),
-                ),
-                child: TextField(
-                  controller: descController,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: "Description (optional)",
-                    hintText: "e.g., Valid for laundry services",
-                    prefixIcon: Padding(
-                      padding: EdgeInsets.only(bottom: 24),
-                      child: Icon(Icons.description_outlined),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 14,
-                      horizontal: 16,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (titleController.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Please enter a title")),
-                      );
-                      return;
-                    }
+              const SizedBox(height: DS.spaceXl),
+              DSButton.primary(
+                label: "Add Promotion",
+                onPressed: () async {
+                  if (titleController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Please enter a title")),
+                    );
+                    return;
+                  }
 
-                    final userId = FirebaseAuth.instance.currentUser?.uid;
-                    if (userId == null) return;
+                  final userId = FirebaseAuth.instance.currentUser?.uid;
+                  if (userId == null) return;
 
-                    final providerDoc = await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(userId)
-                        .get();
-                    final providerName =
-                        providerDoc.data()?['name'] ?? 'Provider';
+                  final providerDoc = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId)
+                      .get();
+                  final providerName =
+                      providerDoc.data()?['name'] ?? 'Provider';
 
-                    await FirebaseFirestore.instance
-                        .collection('promotions')
-                        .add({
-                          'provider_id': userId,
-                          'provider_name': providerName,
-                          'title': titleController.text.trim(),
-                          'discount': discountController.text.trim(),
-                          'description': descController.text.trim(),
-                          'is_active': true,
-                          'created_at': FieldValue.serverTimestamp(),
-                        });
+                  await FirebaseFirestore.instance
+                      .collection('promotions')
+                      .add({
+                    'provider_id': userId,
+                    'provider_name': providerName,
+                    'title': titleController.text.trim(),
+                    'discount': discountController.text.trim(),
+                    'description': descController.text.trim(),
+                    'is_active': true,
+                    'created_at': FieldValue.serverTimestamp(),
+                  });
 
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Promotion added!"),
-                          backgroundColor: AppColors.kBlack,
-                        ),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.kBlack,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    "Add Promotion",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Promotion added!"),
+                        backgroundColor: AppColors.kBlack,
+                      ),
+                    );
+                  }
+                },
               ),
+              const SizedBox(height: DS.spaceXl),
             ],
           ),
         ),

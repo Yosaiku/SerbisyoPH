@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:serbisyo_ph/theme/colors.dart';
+import 'package:serbisyo_ph/theme/design_system.dart';
 import 'package:serbisyo_ph/utilities/service_icons.dart';
 
 class IncomingOrders extends StatefulWidget {
@@ -28,26 +28,9 @@ class _IncomingOrdersState extends State<IncomingOrders> {
   Widget build(BuildContext context) {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(
-              Icons.receipt_long_outlined,
-              size: 64,
-              color: AppColors.kBorder,
-            ),
-            SizedBox(height: 16),
-            Text(
-              "Sign in to view incoming orders",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.kBlack,
-              ),
-            ),
-          ],
-        ),
+      return DSEmptyState(
+        icon: Icons.receipt_long_outlined,
+        title: "Sign in to view incoming orders",
       );
     }
 
@@ -61,38 +44,10 @@ class _IncomingOrdersState extends State<IncomingOrders> {
         }
 
         if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.wifi_off_outlined,
-                  size: 64,
-                  color: AppColors.kGreyText,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  "Unable to load orders",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.kBlack,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Text(
-                    snapshot.error.toString(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.kGreyText,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
+          return DSEmptyState(
+            icon: Icons.wifi_off_outlined,
+            title: "Unable to load orders",
+            subtitle: snapshot.error.toString(),
           );
         }
 
@@ -108,8 +63,16 @@ class _IncomingOrdersState extends State<IncomingOrders> {
           return bTime.compareTo(aTime);
         });
 
+        if (orders.isEmpty) {
+          return DSEmptyState(
+            icon: Icons.inbox_outlined,
+            title: "No incoming orders",
+            subtitle: "New orders will appear here",
+          );
+        }
+
         return ListView.separated(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(DS.spaceLg),
           itemCount: orders.length,
           itemBuilder: (context, index) {
             final order = orders[index];
@@ -131,7 +94,7 @@ class _IncomingOrdersState extends State<IncomingOrders> {
                   : '',
             );
           },
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
+          separatorBuilder: (context, index) => const SizedBox(height: DS.spaceMd),
         );
       },
     );
@@ -206,201 +169,126 @@ class IncomingOrderCard extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: AppColors.kWhite,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(DS.radiusXl)),
       ),
       builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.kBorder,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                "MAKE AN OFFER",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.kWhite,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.kBorder),
-                ),
-                child: TextField(
+        builder: (context, setModalState) => DSModalBottomSheet(
+          title: "MAKE AN OFFER",
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: DS.spaceLg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: DS.spaceXl),
+                DSInput(
                   controller: priceController,
+                  label: "Price (₱)",
+                  hint: "Enter your price",
+                  prefixIcon: Icons.attach_money,
                   keyboardType: TextInputType.number,
-                  cursorColor: AppColors.kBlack,
-                  decoration: const InputDecoration(
-                    labelText: "Price (₱)",
-                    hintText: "Enter your price",
-                    labelStyle: TextStyle(color: AppColors.kGreyText),
-                    hintStyle: TextStyle(color: AppColors.kGreyText),
-                    prefixIcon: Icon(
-                      Icons.attach_money,
-                      color: AppColors.kBlack,
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 16,
-                      horizontal: 16,
-                    ),
-                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                "Schedule",
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => setModalState(() {
-                        isImmediate = true;
-                        scheduleHours = null;
-                      }),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: isImmediate
-                              ? AppColors.kBlack
-                              : AppColors.kBackground,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
+                const SizedBox(height: DS.spaceLg),
+                DSText.labelMedium("Schedule"),
+                const SizedBox(height: DS.spaceMd),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setModalState(() {
+                          isImmediate = true;
+                          scheduleHours = null;
+                        }),
+                        child: Container(
+                          padding: const EdgeInsets.all(DS.spaceMd),
+                          decoration: BoxDecoration(
                             color: isImmediate
                                 ? AppColors.kBlack
-                                : AppColors.kBorder,
+                                : AppColors.kBackground,
+                            borderRadius: BorderRadius.circular(DS.radiusMd),
+                            border: Border.all(
+                              color: isImmediate
+                                  ? AppColors.kBlack
+                                  : AppColors.kBorder,
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          "Immediate",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: isImmediate
-                                ? AppColors.kWhite
-                                : AppColors.kBlack,
-                            fontWeight: FontWeight.w600,
+                          child: Center(
+                            child: DSText.labelMedium(
+                              "Immediate",
+                              color: isImmediate ? AppColors.kWhite : AppColors.kBlack,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => setModalState(() {
-                        isImmediate = false;
-                      }),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: !isImmediate
-                              ? AppColors.kBlack
-                              : AppColors.kBackground,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
+                    const SizedBox(width: DS.spaceMd),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setModalState(() {
+                          isImmediate = false;
+                        }),
+                        child: Container(
+                          padding: const EdgeInsets.all(DS.spaceMd),
+                          decoration: BoxDecoration(
                             color: !isImmediate
                                 ? AppColors.kBlack
-                                : AppColors.kBorder,
+                                : AppColors.kBackground,
+                            borderRadius: BorderRadius.circular(DS.radiusMd),
+                            border: Border.all(
+                              color: !isImmediate
+                                  ? AppColors.kBlack
+                                  : AppColors.kBorder,
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          "Scheduled",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: !isImmediate
-                                ? AppColors.kWhite
-                                : AppColors.kBlack,
-                            fontWeight: FontWeight.w600,
+                          child: Center(
+                            child: DSText.labelMedium(
+                              "Scheduled",
+                              color: !isImmediate ? AppColors.kWhite : AppColors.kBlack,
+                            ),
                           ),
                         ),
                       ),
+                    ),
+                  ],
+                ),
+                if (!isImmediate) ...[
+                  const SizedBox(height: DS.spaceMd),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: DS.spaceLg),
+                    decoration: BoxDecoration(
+                      color: AppColors.kWhite,
+                      borderRadius: BorderRadius.circular(DS.radiusMd),
+                      border: Border.all(color: AppColors.kBorder),
+                    ),
+                    child: DropdownButtonFormField<int>(
+                      initialValue: scheduleHours,
+                      decoration: const InputDecoration(
+                        labelText: "Hours from now",
+                        labelStyle: DS.bodySmall,
+                        border: InputBorder.none,
+                      ),
+                      items: [1, 2, 3, 4, 6, 12, 24].map((h) {
+                        return DropdownMenuItem(
+                          value: h,
+                          child: DSText.bodyMedium("$h hour(s)"),
+                        );
+                      }).toList(),
+                      onChanged: (val) =>
+                          setModalState(() => scheduleHours = val),
                     ),
                   ),
                 ],
-              ),
-              if (!isImmediate) ...[
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: AppColors.kWhite,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.kBorder),
-                  ),
-                  child: DropdownButtonFormField<int>(
-                    initialValue: scheduleHours,
-                    decoration: const InputDecoration(
-                      labelText: "Hours from now",
-                      labelStyle: TextStyle(color: AppColors.kGreyText),
-                      border: InputBorder.none,
-                    ),
-                    items: [1, 2, 3, 4, 6, 12, 24].map((h) {
-                      return DropdownMenuItem(
-                        value: h,
-                        child: Text("$h hour(s)"),
-                      );
-                    }).toList(),
-                    onChanged: (val) =>
-                        setModalState(() => scheduleHours = val),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 16),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.kWhite,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.kBorder),
-                ),
-                child: TextField(
+                const SizedBox(height: DS.spaceLg),
+                DSInput(
                   controller: termsController,
+                  label: "Terms / Notes",
+                  hint: "Any special conditions",
+                  prefixIcon: Icons.note_outlined,
                   maxLines: 2,
-                  cursorColor: AppColors.kBlack,
-                  decoration: const InputDecoration(
-                    labelText: "Terms / Notes",
-                    hintText: "Any special conditions",
-                    labelStyle: TextStyle(color: AppColors.kGreyText),
-                    hintStyle: TextStyle(color: AppColors.kGreyText),
-                    prefixIcon: Padding(
-                      padding: EdgeInsets.only(bottom: 24),
-                      child: Icon(Icons.note_outlined, color: AppColors.kBlack),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 16,
-                      horizontal: 16,
-                    ),
-                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
+                const SizedBox(height: DS.spaceXl),
+                DSButton.primary(
+                  label: "Submit Offer",
                   onPressed: () async {
                     final price = priceController.text.trim();
                     if (price.isEmpty) {
@@ -429,16 +317,16 @@ class IncomingOrderCard extends StatelessWidget {
                       final offerRef = await FirebaseFirestore.instance
                           .collection('offers')
                           .add({
-                            'order_id': orderId,
-                            'provider_id': userId,
-                            'provider_name': providerName,
-                            'price': double.parse(price),
-                            'is_immediate': isImmediate,
-                            'schedule_hours': scheduleHours,
-                            'terms': termsController.text.trim(),
-                            'status': 'pending',
-                            'created_at': FieldValue.serverTimestamp(),
-                          });
+                        'order_id': orderId,
+                        'provider_id': userId,
+                        'provider_name': providerName,
+                        'price': double.parse(price),
+                        'is_immediate': isImmediate,
+                        'schedule_hours': scheduleHours,
+                        'terms': termsController.text.trim(),
+                        'status': 'pending',
+                        'created_at': FieldValue.serverTimestamp(),
+                      });
 
                       await FirebaseFirestore.instance
                           .collection('orders')
@@ -449,17 +337,17 @@ class IncomingOrderCard extends StatelessWidget {
                         await FirebaseFirestore.instance
                             .collection('notifications')
                             .add({
-                              'recipient_id': customerId,
-                              'title': 'New Offer Received',
-                              'body':
-                                  '$providerName offered ₱$price for $serviceType',
-                              'data': {
-                                'order_id': orderId,
-                                'offer_id': offerRef.id,
-                              },
-                              'read': false,
-                              'created_at': FieldValue.serverTimestamp(),
-                            });
+                          'recipient_id': customerId,
+                          'title': 'New Offer Received',
+                          'body':
+                              '$providerName offered ₱$price for $serviceType',
+                          'data': {
+                            'order_id': orderId,
+                            'offer_id': offerRef.id,
+                          },
+                          'read': false,
+                          'created_at': FieldValue.serverTimestamp(),
+                        });
                       }
 
                       if (context.mounted) {
@@ -482,19 +370,10 @@ class IncomingOrderCard extends StatelessWidget {
                       }
                     }
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.kBlack,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    "Submit Offer",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: DS.spaceXl),
+              ],
+            ),
           ),
         ),
       ),
@@ -503,125 +382,82 @@ class IncomingOrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.kWhite,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.kBorder),
-      ),
+    return DSCard(
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ListTile(
-            contentPadding: const EdgeInsets.all(12),
-            leading: Container(
-              height: 50,
-              width: 50,
-              decoration: BoxDecoration(
-                color: AppColors.kBlack,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(_getServiceIcon(), color: AppColors.kWhite),
-            ),
-            title: Text(
-              serviceType,
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                color: AppColors.kBlack,
-              ),
-            ),
-            subtitle: Row(
+          Padding(
+            padding: const EdgeInsets.all(DS.spaceMd),
+            child: Row(
               children: [
-                Text(
-                  createdAt,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.kGreyText,
+                Container(
+                  height: 50,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    color: AppColors.kBlack,
+                    borderRadius: BorderRadius.circular(DS.radiusMd),
+                  ),
+                  child: Icon(_getServiceIcon(), color: AppColors.kWhite, size: DS.iconMd),
+                ),
+                const SizedBox(width: DS.spaceMd),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DSText.titleMedium(serviceType),
+                      const SizedBox(height: DS.spaceXs),
+                      DSText.caption(createdAt),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: DS.spaceLg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildLocationRow(Icons.trip_origin, 'Pickup:', pickupLocation),
-                const SizedBox(height: 6),
-                _buildLocationRow(
-                  Icons.location_on,
-                  'Delivery:',
-                  deliveryLocation,
+                DSLocationRow(
+                  icon: Icons.trip_origin,
+                  label: 'Pickup:',
+                  value: pickupLocation,
+                ),
+                const SizedBox(height: DS.spaceSm),
+                DSLocationRow(
+                  icon: Icons.location_on,
+                  label: 'Delivery:',
+                  value: deliveryLocation,
                 ),
                 if (_getQuantityLabel().isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  _buildLocationRow(
-                    Icons.inventory_2_outlined,
-                    'Quantity:',
-                    _getQuantityLabel(),
+                  const SizedBox(height: DS.spaceSm),
+                  DSLocationRow(
+                    icon: Icons.inventory_2_outlined,
+                    label: 'Quantity:',
+                    value: _getQuantityLabel(),
                   ),
                 ],
                 if (note.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  _buildLocationRow(Icons.note_outlined, 'Note:', note),
+                  const SizedBox(height: DS.spaceSm),
+                  DSLocationRow(
+                    icon: Icons.note_outlined,
+                    label: 'Note:',
+                    value: note,
+                  ),
                 ],
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 48,
-                    child: OutlinedButton(
-                      onPressed: () => _showOfferDialog(context),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.kBlack,
-                        side: const BorderSide(color: AppColors.kBorder),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        "Make Offer",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            padding: const EdgeInsets.all(DS.spaceMd),
+            child: DSButton.secondary(
+              label: "Make Offer",
+              onPressed: () => _showOfferDialog(context),
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildLocationRow(IconData icon, String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 16, color: AppColors.kGreyText),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: AppColors.kGreyText,
-          ),
-        ),
-        const SizedBox(width: 4),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(fontSize: 12, color: AppColors.kBlack),
-          ),
-        ),
-      ],
     );
   }
 }

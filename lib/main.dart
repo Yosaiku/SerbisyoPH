@@ -8,7 +8,7 @@ import 'package:serbisyo_ph/navbars/home_navigation_bar.dart';
 import 'package:serbisyo_ph/navbars/provider_navigation_bar.dart';
 import 'package:serbisyo_ph/pages/auth/login_page.dart';
 import 'package:serbisyo_ph/services/notification_service.dart';
-import 'package:serbisyo_ph/theme/colors.dart';
+import 'package:serbisyo_ph/theme/design_system.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,29 +36,69 @@ class SerbisyoApp extends StatelessWidget {
           surface: AppColors.kWhite,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.kBackground,
+          backgroundColor: Colors.transparent,
           foregroundColor: AppColors.kBlack,
           elevation: 0,
+          centerTitle: true,
+          titleTextStyle: DS.headlineMedium,
         ),
         dividerTheme: const DividerThemeData(
           color: AppColors.kBorder,
           thickness: 1,
-          space: 0,
+          space: DS.spaceXl,
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: false,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(DS.radiusMd),
             borderSide: const BorderSide(color: AppColors.kBorder),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(DS.radiusMd),
             borderSide: const BorderSide(color: AppColors.kBorder),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(DS.radiusMd),
             borderSide: const BorderSide(color: AppColors.kBlack, width: 1.5),
           ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: DS.spaceLg,
+            vertical: DS.spaceMd,
+          ),
+          hintStyle: DS.bodySmall,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.kBlack,
+            foregroundColor: AppColors.kWhite,
+            elevation: 0,
+            minimumSize: const Size(double.infinity, DS.btnHeightLg),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(DS.radiusLg),
+            ),
+            textStyle: DS.labelMedium,
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.kBlack,
+            minimumSize: const Size(double.infinity, DS.btnHeightLg),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(DS.radiusLg),
+            ),
+            side: const BorderSide(color: AppColors.kBorder),
+            textStyle: DS.labelMedium,
+          ),
+        ),
+        chipTheme: ChipThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(DS.radiusFull),
+          ),
+          side: const BorderSide(color: AppColors.kBorder),
+          selectedColor: AppColors.kBlack,
+          labelStyle: DS.labelMedium,
+          secondaryLabelStyle: DS.labelMedium.copyWith(color: AppColors.kWhite),
+          padding: const EdgeInsets.symmetric(horizontal: DS.spaceMd, vertical: DS.spaceXs),
         ),
       ),
       home: const AuthGate(),

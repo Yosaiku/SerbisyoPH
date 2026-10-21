@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:serbisyo_ph/theme/colors.dart';
+import 'package:serbisyo_ph/theme/design_system.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -62,6 +62,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         const SnackBar(
           content: Text("Name is required"),
           backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
@@ -80,6 +81,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           const SnackBar(
             content: Text("Profile updated!"),
             backgroundColor: AppColors.kBlack,
+            behavior: SnackBarBehavior.floating,
           ),
         );
         Navigator.pop(context);
@@ -87,7 +89,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text("Error: $e"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }
@@ -99,49 +105,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.kBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.kBlack),
-        title: const Text(
-          "EDIT PROFILE",
-          style: TextStyle(
-            color: AppColors.kBlack,
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.2,
-          ),
-        ),
-        centerTitle: true,
-      ),
+      appBar: DSAppBar(title: "EDIT PROFILE"),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: AppColors.kBlack))
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(DS.spaceLg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
                     child: Stack(
                       children: [
-                        Container(
-                          height: 100,
-                          width: 100,
-                          decoration: BoxDecoration(
-                            color: AppColors.kBlack,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            color: AppColors.kWhite,
-                            size: 50,
-                          ),
+                        DSAvatar(
+                          initials: _nameController.text.isNotEmpty
+                              ? _nameController.text.substring(0, 1).toUpperCase()
+                              : 'U',
+                          size: DS.avatarXl,
                         ),
                         Positioned(
                           bottom: 0,
                           right: 0,
                           child: Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(DS.spaceSm),
                             decoration: const BoxDecoration(
                               color: AppColors.kBlack,
                               shape: BoxShape.circle,
@@ -149,117 +134,45 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             child: const Icon(
                               Icons.camera_alt,
                               color: AppColors.kWhite,
-                              size: 20,
+                              size: DS.iconSm,
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 40),
-                  _buildSectionTitle("Full Name"),
-                  const SizedBox(height: 8),
-                  _buildTextField(
+                  const SizedBox(height: DS.spaceXl),
+                  DSInput(
                     controller: _nameController,
+                    label: "Full Name",
                     hint: "Enter your name",
-                    icon: Icons.person_outline,
+                    prefixIcon: Icons.person_outline,
                   ),
-                  const SizedBox(height: 24),
-                  _buildSectionTitle("Phone Number"),
-                  const SizedBox(height: 8),
-                  _buildTextField(
+                  const SizedBox(height: DS.spaceXl),
+                  DSInput(
                     controller: _phoneController,
+                    label: "Phone Number",
                     hint: "Enter your phone number",
-                    icon: Icons.phone_outlined,
+                    prefixIcon: Icons.phone_outlined,
                     keyboardType: TextInputType.phone,
                   ),
-                  const SizedBox(height: 24),
-                  _buildSectionTitle("Email"),
-                  const SizedBox(height: 8),
-                  _buildTextField(
+                  const SizedBox(height: DS.spaceXl),
+                  DSInput(
                     controller: _emailController,
+                    label: "Email",
                     hint: "Enter your email",
-                    icon: Icons.email_outlined,
+                    prefixIcon: Icons.email_outlined,
                     enabled: false,
                   ),
-                  const SizedBox(height: 40),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _saving ? null : _saveProfile,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.kBlack,
-                        foregroundColor: AppColors.kWhite,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: _saving
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                color: AppColors.kWhite,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Text(
-                              "Save Changes",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                    ),
+                  const SizedBox(height: DS.space2xl),
+                  DSButton.primary(
+                    label: "Save Changes",
+                    onPressed: _saving ? null : _saveProfile,
+                    loading: _saving,
                   ),
                 ],
               ),
             ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: AppColors.kGreyText,
-        letterSpacing: 0.8,
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-    TextInputType? keyboardType,
-    bool enabled = true,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.kWhite,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.kBorder),
-      ),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        enabled: enabled,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(color: AppColors.kGreyText),
-          prefixIcon: Icon(icon, color: AppColors.kBlack),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-        ),
-      ),
     );
   }
 }

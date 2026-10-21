@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:serbisyo_ph/theme/colors.dart';
+import 'package:serbisyo_ph/theme/design_system.dart';
 import 'package:serbisyo_ph/pages/auth/login_page.dart';
 import 'package:serbisyo_ph/pages/notifications/notifications_page.dart';
 import 'package:serbisyo_ph/pages/settings/edit_profile_page.dart';
@@ -57,32 +57,19 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.kBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.kBlack),
-        title: const Text(
-          "Settings",
-          style: TextStyle(
-            color: AppColors.kBlack,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-      ),
+      appBar: DSAppBar(title: "Settings"),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: AppColors.kBlack))
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(DS.spaceLg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildProfileSection(),
-                  const SizedBox(height: 24),
-                  _buildSectionTitle("Account"),
-                  const SizedBox(height: 12),
-                  _buildSettingsTile(
+                  const SizedBox(height: DS.spaceXl),
+                  DSSectionHeader(title: "Account"),
+                  const SizedBox(height: DS.spaceMd),
+                  DSActionTile(
                     icon: Icons.person_outline,
                     title: "Edit Profile",
                     onTap: () {
@@ -94,7 +81,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       );
                     },
                   ),
-                  _buildSettingsTile(
+                  DSActionTile(
                     icon: Icons.notifications_outlined,
                     title: "Notifications",
                     onTap: () {
@@ -106,27 +93,28 @@ class _SettingsPageState extends State<SettingsPage> {
                       );
                     },
                   ),
-                  const SizedBox(height: 24),
-                  _buildSectionTitle("Support"),
-                  const SizedBox(height: 12),
-                  _buildSettingsTile(
+                  const SizedBox(height: DS.spaceXl),
+                  DSSectionHeader(title: "Support"),
+                  const SizedBox(height: DS.spaceMd),
+                  DSActionTile(
                     icon: Icons.help_outline,
                     title: "Help Center",
                     onTap: () {},
                   ),
-                  _buildSettingsTile(
+                  DSActionTile(
                     icon: Icons.info_outline,
                     title: "About",
                     onTap: () {},
                   ),
-                  const SizedBox(height: 30),
-                  _buildSettingsTile(
+                  const SizedBox(height: DS.spaceXl),
+                  DSActionTile(
                     icon: Icons.logout,
                     title: "Log Out",
-                    textColor: Colors.red,
+                    titleColor: Colors.red,
+                    iconColor: Colors.red,
                     onTap: _logout,
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: DS.space2xl),
                 ],
               ),
             ),
@@ -134,125 +122,30 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildProfileSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.kWhite,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.kBorder),
-      ),
+    return DSCard(
+      padding: const EdgeInsets.all(DS.spaceLg),
       child: Row(
         children: [
-          Container(
-            height: 60,
-            width: 60,
-            decoration: BoxDecoration(
-              color: AppColors.kBlack,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(Icons.person, color: AppColors.kWhite, size: 30),
+          DSAvatar(
+            initials: _userData?['name']?.substring(0, 1).toUpperCase() ?? 'U',
+            size: DS.avatarLg,
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: DS.spaceLg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  _userData?['name'] ?? 'User',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.kBlack,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _userData?['email'] ?? '',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.kGreyText,
-                  ),
-                ),
+                DSText.headlineMedium(_userData?['name'] ?? 'User'),
+                const SizedBox(height: DS.spaceXs),
+                DSText.bodySmall(_userData?['email'] ?? ''),
                 if (_userData?['phone'] != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    _userData!['phone'],
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.kGreyText,
-                    ),
-                  ),
+                  const SizedBox(height: DS.spaceXs),
+                  DSText.bodySmall(_userData!['phone']),
                 ],
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: AppColors.kGreyText,
-        letterSpacing: 0.8,
-      ),
-    );
-  }
-
-  Widget _buildSettingsTile({
-    required IconData icon,
-    required String title,
-    String? subtitle,
-    Color? textColor,
-    Widget? trailing,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.kWhite,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.kBorder),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: textColor ?? AppColors.kBlack),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: textColor ?? AppColors.kBlack,
-                    ),
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.kGreyText,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            trailing ?? Icon(Icons.chevron_right, color: AppColors.kGreyText),
-          ],
-        ),
       ),
     );
   }

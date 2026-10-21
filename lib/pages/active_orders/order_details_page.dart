@@ -374,8 +374,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           _ratingSubmitting = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Thank you for rating!'),
+          SnackBar(
+            content: const Text('Thank you for rating!'),
             backgroundColor: AppColors.kBlack,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -408,8 +408,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not launch phone dialer'),
+          SnackBar(
+            content: const Text('Could not launch phone dialer'),
             backgroundColor: AppColors.kBlack,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -828,6 +828,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         ],
       ),
     );
+  }
+
   Widget _buildRatingSection() {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
     final isCustomer = _orderData?['customer_id'] == currentUserId;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:serbisyo_ph/theme/colors.dart';
+import 'package:serbisyo_ph/theme/design_system.dart';
 import 'package:serbisyo_ph/pages/active_orders/order_details_page.dart';
 import 'package:serbisyo_ph/pages/active_orders/order_history_page.dart';
 import 'package:serbisyo_ph/utilities/service_icons.dart';
@@ -34,62 +34,41 @@ class _ActiveOrdersState extends State<ActiveOrders>
     final userId = FirebaseAuth.instance.currentUser?.uid;
 
     if (userId == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(
-              Icons.receipt_long_outlined,
-              size: 64,
-              color: AppColors.kBorder,
-            ),
-            SizedBox(height: 16),
-            Text(
-              "Sign in to view your orders",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.kBlack,
-              ),
-            ),
-          ],
-        ),
+      return DSEmptyState(
+        icon: Icons.receipt_long_outlined,
+        title: "Sign in to view your orders",
       );
     }
 
     return Scaffold(
       backgroundColor: AppColors.kBackground,
-      appBar: AppBar(
-        backgroundColor: AppColors.kBackground,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.kBlack),
-        title: const Text(
-          "MY ORDERS",
-          style: TextStyle(
-            color: AppColors.kBlack,
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.2,
-          ),
-        ),
+      appBar: DSAppBar(
+        title: "MY ORDERS",
         centerTitle: true,
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.kBlack,
-          unselectedLabelColor: AppColors.kGreyText,
-          indicatorColor: AppColors.kBlack,
-          labelStyle: const TextStyle(fontWeight: FontWeight.w700),
-          tabs: const [
-            Tab(text: "ACTIVE"),
-            Tab(text: "HISTORY"),
-          ],
-        ),
+        actions: [],
       ),
-      body: TabBarView(
-        controller: _tabController,
+      body: Column(
         children: [
-          _ActiveOrdersList(userId: userId),
-          const OrderHistoryPage(),
+          TabBar(
+            controller: _tabController,
+            labelColor: AppColors.kBlack,
+            unselectedLabelColor: AppColors.kGreyText,
+            indicatorColor: AppColors.kBlack,
+            labelStyle: DS.labelMedium,
+            tabs: const [
+              Tab(text: "ACTIVE"),
+              Tab(text: "HISTORY"),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _ActiveOrdersList(userId: userId),
+                const OrderHistoryPage(),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -118,54 +97,24 @@ class _ActiveOrdersList extends StatelessWidget {
         }
 
         if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 48, color: AppColors.kBorder),
-                const SizedBox(height: 12),
-                Text(
-                  "Unable to load orders",
-                  style: TextStyle(fontSize: 14, color: AppColors.kGreyText),
-                ),
-              ],
-            ),
+          return DSEmptyState(
+            icon: Icons.error_outline,
+            title: "Unable to load orders",
           );
         }
 
         final orders = snapshot.data?.docs ?? [];
 
         if (orders.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.receipt_long_outlined,
-                  size: 64,
-                  color: AppColors.kBorder,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  "No active orders",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.kBlack,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  "Your active orders will appear here",
-                  style: TextStyle(fontSize: 13, color: AppColors.kGreyText),
-                ),
-              ],
-            ),
+          return DSEmptyState(
+            icon: Icons.receipt_long_outlined,
+            title: "No active orders",
+            subtitle: "Your active orders will appear here",
           );
         }
 
         return ListView.separated(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(DS.spaceLg),
           itemCount: orders.length,
           itemBuilder: (context, index) {
             final order = orders[index];
@@ -180,7 +129,7 @@ class _ActiveOrdersList extends StatelessWidget {
                   : '',
             );
           },
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
+          separatorBuilder: (context, index) => const SizedBox(height: DS.spaceMd),
         );
       },
     );
@@ -264,43 +213,20 @@ class _OrderCardState extends State<OrderCard>
   Future<void> _cancelOrder() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Cancel Order?',
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            color: AppColors.kBlack,
-          ),
-        ),
-        content: const Text(
+      builder: (context) => DSDialog(
+        title: 'Cancel Order?',
+        content: DSText.bodyMedium(
           'Are you sure you want to cancel this order? This action cannot be undone.',
-          style: TextStyle(color: AppColors.kGreyText),
+          color: AppColors.kGreyText,
         ),
         actions: [
-          TextButton(
+          DSButton.secondary(
+            label: 'Keep Order',
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(
-              'Keep Order',
-              style: TextStyle(
-                color: AppColors.kGreyText,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
           ),
-          ElevatedButton(
+          DSButton.destructive(
+            label: 'Cancel Order',
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.kBlack,
-              foregroundColor: AppColors.kWhite,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: const Text(
-              'Cancel Order',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
           ),
         ],
       ),
@@ -318,7 +244,6 @@ class _OrderCardState extends State<OrderCard>
         'cancelled_by': 'customer',
       });
 
-      // Notify provider if order was accepted
       if (widget.status == 'accepted') {
         final orderDoc = await FirebaseFirestore.instance
             .collection('orders')
@@ -344,7 +269,7 @@ class _OrderCardState extends State<OrderCard>
             backgroundColor: AppColors.kBlack,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(DS.radiusMd),
             ),
           ),
         );
@@ -357,7 +282,7 @@ class _OrderCardState extends State<OrderCard>
             backgroundColor: AppColors.kBlack,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(DS.radiusMd),
             ),
           ),
         );
@@ -399,71 +324,57 @@ class _OrderCardState extends State<OrderCard>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.kWhite,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.kBorder),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(12),
-        leading: Container(
-          height: 50,
-          width: 50,
-          decoration: BoxDecoration(
-            color: AppColors.kBlack,
-            borderRadius: BorderRadius.circular(14),
+    return DSCard(
+      padding: const EdgeInsets.all(DS.spaceMd),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OrderDetailsPage(orderId: widget.orderId),
           ),
-          child: Icon(_getServiceIcon(), color: AppColors.kWhite),
-        ),
-        title: Text(
-          widget.serviceType,
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            color: AppColors.kBlack,
-          ),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Row(
-            children: [
-              FadeTransition(
-                opacity: _controller,
-                child: Text(
-                  _getStatusText(),
-                  style: TextStyle(
-                    color: _getStatusColor(),
-                    fontWeight: FontWeight.w500,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              Text(
-                widget.createdAt,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.kGreyText,
-                ),
-              ),
-            ],
-          ),
-        ),
-        trailing: _canCancel()
-            ? IconButton(
-                icon: const Icon(Icons.close, color: AppColors.kBlack, size: 22),
-                onPressed: _cancelOrder,
-                tooltip: 'Cancel Order',
-              )
-            : null,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => OrderDetailsPage(orderId: widget.orderId),
+        );
+      },
+      child: Row(
+        children: [
+          Container(
+            height: 50,
+            width: 50,
+            decoration: BoxDecoration(
+              color: AppColors.kBlack,
+              borderRadius: BorderRadius.circular(DS.radiusMd),
             ),
-          );
-        },
+            child: Icon(_getServiceIcon(), color: AppColors.kWhite, size: DS.iconMd),
+          ),
+          const SizedBox(width: DS.spaceLg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DSText.titleMedium(widget.serviceType),
+                const SizedBox(height: DS.spaceXs),
+                Row(
+                  children: [
+                    FadeTransition(
+                      opacity: _controller,
+                      child: DSText.bodySmall(
+                        _getStatusText(),
+                        color: _getStatusColor(),
+                      ),
+                    ),
+                    const Spacer(),
+                    DSText.caption(widget.createdAt),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (_canCancel())
+            IconButton(
+              icon: const Icon(Icons.close, color: AppColors.kBlack, size: DS.iconMd),
+              onPressed: _cancelOrder,
+              tooltip: 'Cancel Order',
+            ),
+        ],
       ),
     );
   }
