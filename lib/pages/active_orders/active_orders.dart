@@ -257,6 +257,114 @@ class _OrderCardState extends State<OrderCard>
     super.dispose();
   }
 
+  bool _canCancel() {
+    return widget.status == 'pending' || widget.status == 'accepted';
+  }
+
+  Future<void> _cancelOrder() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Cancel Order?',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: AppColors.kBlack,
+          ),
+        ),
+        content: const Text(
+          'Are you sure you want to cancel this order? This action cannot be undone.',
+          style: TextStyle(color: AppColors.kGreyText),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              'Keep Order',
+              style: TextStyle(
+                color: AppColors.kGreyText,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.kBlack,
+              foregroundColor: AppColors.kWhite,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Cancel Order',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('orders')
+          .doc(widget.orderId)
+          .update({
+        'status': 'cancelled',
+        'cancelled_at': FieldValue.serverTimestamp(),
+        'cancelled_by': 'customer',
+      });
+
+      // Notify provider if order was accepted
+      if (widget.status == 'accepted') {
+        final orderDoc = await FirebaseFirestore.instance
+            .collection('orders')
+            .doc(widget.orderId)
+            .get();
+        final providerId = orderDoc.data()?['provider_id'];
+        if (providerId != null) {
+          await FirebaseFirestore.instance.collection('notifications').add({
+            'recipient_id': providerId,
+            'title': 'Order Cancelled',
+            'body': 'The customer has cancelled the ${widget.serviceType} order',
+            'data': {'order_id': widget.orderId},
+            'read': false,
+            'created_at': FieldValue.serverTimestamp(),
+          });
+        }
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Order cancelled'),
+            backgroundColor: AppColors.kBlack,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to cancel order: $e'),
+            backgroundColor: AppColors.kBlack,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   IconData _getServiceIcon() => serviceIcon(widget.serviceType);
 
   String _getStatusText() {
@@ -341,6 +449,13 @@ class _OrderCardState extends State<OrderCard>
             ],
           ),
         ),
+        trailing: _canCancel()
+            ? IconButton(
+                icon: const Icon(Icons.close, color: AppColors.kBlack, size: 22),
+                onPressed: _cancelOrder,
+                tooltip: 'Cancel Order',
+              )
+            : null,
         onTap: () {
           Navigator.push(
             context,

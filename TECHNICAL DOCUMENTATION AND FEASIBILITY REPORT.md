@@ -1,10 +1,6 @@
 # Technical Documentation and Feasibility Report for Serbisyo PH
 
-**Prepared by:** [AUTHOR NAME / ORGANIZATION]
-**Date:** [SUBMISSION DATE]
-**Version:** 1.0.0+1
 
----
 
 ## 1. Introduction
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:serbisyo_ph/theme/colors.dart';
 import 'package:serbisyo_ph/pages/chat/chat_page.dart';
 import 'package:serbisyo_ph/utilities/service_icons.dart';
@@ -16,8 +18,13 @@ class OrderDetailsPage extends StatefulWidget {
 class _OrderDetailsPageState extends State<OrderDetailsPage> {
   Map<String, dynamic>? _orderData;
   Map<String, dynamic>? _providerData;
+  Map<String, dynamic>? _customerData;
   bool _loading = true;
   List<DocumentSnapshot> _offers = [];
+  double _userRating = 0;
+  bool _hasRated = false;
+  bool _ratingSubmitting = false;
+  final TextEditingController _reviewController = TextEditingController();
 
   @override
   void initState() {
@@ -37,6 +44,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         _orderData = data;
       });
 
+      // Load provider data
       if (data['provider_id'] != null) {
         final providerDoc = await FirebaseFirestore.instance
             .collection('users')
@@ -45,6 +53,35 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         if (providerDoc.exists) {
           setState(() {
             _providerData = providerDoc.data();
+          });
+        }
+      }
+
+      // Load customer data
+      if (data['customer_id'] != null) {
+        final customerDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(data['customer_id'])
+            .get();
+        if (customerDoc.exists) {
+          setState(() {
+            _customerData = customerDoc.data();
+          });
+        }
+      }
+
+      // Check if already rated
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId != null && data['status'] == 'completed') {
+        final existingRating = await FirebaseFirestore.instance
+            .collection('reviews')
+            .where('order_id', isEqualTo: widget.orderId)
+            .where('customer_id', isEqualTo: userId)
+            .get();
+        if (existingRating.docs.isNotEmpty) {
+          setState(() {
+            _hasRated = true;
+            _userRating = (existingRating.docs.first.data()['rating'] ?? 0).toDouble();
           });
         }
       }
@@ -185,6 +222,205 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     }
   }
 
+  bool _canCancel() {
+    final status = _orderData?['status'];
+    return status == 'pending' || status == 'accepted';
+  }
+
+  Future<void> _cancelOrder() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Cancel Order?',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: AppColors.kBlack,
+          ),
+        ),
+        content: const Text(
+          'Are you sure you want to cancel this order? This action cannot be undone.',
+          style: TextStyle(color: AppColors.kGreyText),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              'Keep Order',
+              style: TextStyle(
+                color: AppColors.kGreyText,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.kBlack,
+              foregroundColor: AppColors.kWhite,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Cancel Order',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final status = _orderData?['status'];
+      await FirebaseFirestore.instance
+          .collection('orders')
+          .doc(widget.orderId)
+          .update({
+        'status': 'cancelled',
+        'cancelled_at': FieldValue.serverTimestamp(),
+        'cancelled_by': 'customer',
+      });
+
+      // Notify provider if order was accepted
+      if (status == 'accepted') {
+        final providerId = _orderData?['provider_id'];
+        if (providerId != null) {
+          final serviceType = _orderData?['service_type'] ?? 'Service';
+          await FirebaseFirestore.instance.collection('notifications').add({
+            'recipient_id': providerId,
+            'title': 'Order Cancelled',
+            'body': 'The customer has cancelled the $serviceType order',
+            'data': {'order_id': widget.orderId},
+            'read': false,
+            'created_at': FieldValue.serverTimestamp(),
+          });
+        }
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Order cancelled'),
+            backgroundColor: AppColors.kBlack,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to cancel order: $e'),
+            backgroundColor: AppColors.kBlack,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _submitRating() async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null || _userRating == 0) return;
+
+    setState(() => _ratingSubmitting = true);
+
+    try {
+      // Save review
+      await FirebaseFirestore.instance.collection('reviews').add({
+        'order_id': widget.orderId,
+        'customer_id': userId,
+        'provider_id': _orderData?['provider_id'],
+        'rating': _userRating,
+        'review': _reviewController.text.trim(),
+        'created_at': FieldValue.serverTimestamp(),
+      });
+
+      // Update provider's average rating
+      final providerId = _orderData?['provider_id'];
+      if (providerId != null) {
+        final providerDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(providerId)
+            .get();
+        if (providerDoc.exists) {
+          final data = providerDoc.data() as Map<String, dynamic>;
+          final currentRating = (data['rating'] ?? 0.0).toDouble();
+          final reviewCount = (data['review_count'] ?? 0).toInt();
+          final newCount = reviewCount + 1;
+          final newRating = ((currentRating * reviewCount) + _userRating) / newCount;
+
+          await FirebaseFirestore.instance.collection('users').doc(providerId).update({
+            'rating': newRating,
+            'review_count': newCount,
+          });
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _hasRated = true;
+          _ratingSubmitting = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Thank you for rating!'),
+            backgroundColor: AppColors.kBlack,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _ratingSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to submit rating: $e'),
+            backgroundColor: AppColors.kBlack,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not launch phone dialer'),
+            backgroundColor: AppColors.kBlack,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -203,6 +439,15 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           ),
         ),
         centerTitle: true,
+        actions: _canCancel()
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.close, color: AppColors.kBlack, size: 26),
+                  onPressed: _cancelOrder,
+                  tooltip: 'Cancel Order',
+                ),
+              ]
+            : null,
       ),
       body: _loading
           ? const Center(
@@ -305,7 +550,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         _providerData!['name'] ?? 'Unknown',
                       ),
                       if (_providerData!['phone'] != null)
-                        _buildInfoRow("Phone", _providerData!['phone']),
+                        _buildPhoneRow(_providerData!['phone']),
                     ]),
                     const SizedBox(height: 12),
                     SizedBox(
@@ -336,6 +581,37 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                         ),
                       ),
                     ),
+                  ],
+                  // Call Customer button (only if current user is the provider)
+                  if (_orderData?['provider_id'] == FirebaseAuth.instance.currentUser?.uid &&
+                      _orderData?['status'] != 'pending' &&
+                      _customerData?['phone'] != null) ...[
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _makePhoneCall(_customerData!['phone']),
+                        icon: const Icon(Icons.phone, size: 18),
+                        label: const Text(
+                          "Call Customer",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.kBlack,
+                          foregroundColor: AppColors.kWhite,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  // Rating section (only if completed and current user is customer)
+                  if (_orderData?['status'] == 'completed' &&
+                      _orderData?['customer_id'] == FirebaseAuth.instance.currentUser?.uid) ...[
+                    const SizedBox(height: 16),
+                    _buildRatingSection(),
                   ],
                   if (_orderData?['status'] == 'pending' &&
                       _offers.isNotEmpty) ...[
@@ -496,6 +772,195 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPhoneRow(String phoneNumber) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              "Phone",
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.kGreyText,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    phoneNumber,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.kBlack,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  height: 36,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _makePhoneCall(phoneNumber),
+                    icon: const Icon(Icons.phone, size: 16),
+                    label: const Text("Call", style: TextStyle(fontSize: 12)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.kBlack,
+                      side: const BorderSide(color: AppColors.kBorder),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  Widget _buildRatingSection() {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final isCustomer = _orderData?['customer_id'] == currentUserId;
+
+    return _buildSection(
+      "Rate Your Experience",
+      [
+        if (!isCustomer) ...[
+          const Center(
+            child: Text(
+              "Only the customer can leave a rating.",
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.kGreyText,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ] else ...[
+          const SizedBox(height: 4),
+          Text(
+            "How was your service?",
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.kBlack,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(5, (index) {
+              final starValue = index + 1;
+              final isFilled = _userRating >= starValue;
+              return GestureDetector(
+                onTap: () => setState(() => _userRating = starValue.toDouble()),
+                child: Icon(
+                  isFilled ? Icons.star : Icons.star_border,
+                  color: AppColors.kBlack,
+                  size: 32,
+                ),
+              );
+            }),
+          ),
+          if (_userRating > 0) ...[
+            const SizedBox(height: 4),
+            Text(
+              "${_userRating.toInt()} star${_userRating == 1 ? '' : 's'}",
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.kGreyText,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          TextField(
+            controller: _reviewController,
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: "Add a review (optional)",
+              hintStyle: const TextStyle(color: AppColors.kGreyText),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.kBorder),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.kBorder),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.kBlack, width: 1.5),
+              ),
+              contentPadding: const EdgeInsets.all(14),
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (!_hasRated)
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: ElevatedButton(
+                onPressed: _ratingSubmitting ? null : _submitRating,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.kBlack,
+                  foregroundColor: AppColors.kWhite,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: _ratingSubmitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: AppColors.kWhite,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        "Submit Rating",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+              ),
+            ),
+          if (_hasRated) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.kBackground,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.kBorder),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.star, color: AppColors.kBlack, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    "You rated this ${_userRating.toInt()} star${_userRating == 1 ? '' : 's'}",
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.kBlack,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ],
     );
   }
 }
