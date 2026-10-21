@@ -117,6 +117,7 @@ class _MapViewState extends State<MapView> {
             'service': data['service_type'] ?? 'General',
             'lat': data['lat'],
             'lng': data['lng'],
+            'review_count': data['review_count'] ?? 0,
             'rating': data['rating']?.toString() ?? '4.5',
             'phone': data['phone'] ?? '',
           });
@@ -211,7 +212,7 @@ class _MapViewState extends State<MapView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.star, color: Colors.orange, size: 20),
+                const Icon(Icons.star, color: AppColors.kBlack, size: 20),
                 const SizedBox(width: 4),
                 Text(
                   provider['rating']?.toString() ?? '4.5',
@@ -219,6 +220,15 @@ class _MapViewState extends State<MapView> {
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: AppColors.kBlack,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '(${provider['review_count'] ?? 0} reviews)',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.kGreyText,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
