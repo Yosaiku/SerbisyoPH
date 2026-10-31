@@ -9,6 +9,7 @@ import 'package:serbisyo_ph/navbars/provider_navigation_bar.dart';
 import 'package:serbisyo_ph/pages/auth/login_page.dart';
 import 'package:serbisyo_ph/services/notification_service.dart';
 import 'package:serbisyo_ph/theme/design_system.dart';
+import 'package:serbisyo_ph/pages/provider/provider_setup_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -162,8 +163,25 @@ class _RoleBasedNavigationState extends State<RoleBasedNavigation> {
           .get();
 
       if (doc.exists && mounted) {
+        final data = doc.data()!;
+        final role = data['role'] ?? 'customer';
+        final hasCompletedSetup = data['has_completed_setup'] ?? false;
+
         setState(() {
-          _userRole = doc.data()?['role'] ?? 'customer';
+          _userRole = role;
+          if (role == 'provider' && !hasCompletedSetup) {
+            // Provider needs to complete setup
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (context) => const ProviderSetupPage(),
+                  ),
+                  (route) => false,
+                );
+              }
+            });
+          }
           _loading = false;
         });
       } else {

@@ -293,6 +293,101 @@ class DSChip extends StatelessWidget {
   }
 }
 
+class DSSegmentedControl<T> extends StatelessWidget {
+  final T value;
+  final Map<T, String> options;
+  final ValueChanged<T> onChanged;
+  final Color? selectedColor;
+  final Color? unselectedColor;
+
+  const DSSegmentedControl({
+    super.key,
+    required this.value,
+    required this.options,
+    required this.onChanged,
+    this.selectedColor,
+    this.unselectedColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SegmentedButton<T>(
+      segments: options.entries.map((entry) {
+        return ButtonSegment<T>(
+          value: entry.key,
+          label: DSText.labelMedium(entry.value),
+        );
+      }).toList(),
+      selected: {value},
+      onSelectionChanged: (newSelection) {
+        if (newSelection.isNotEmpty) {
+          onChanged(newSelection.first);
+        }
+      },
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return selectedColor ?? AppColors.kBlack;
+          }
+          return unselectedColor ?? AppColors.kWhite;
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.kWhite;
+          }
+          return AppColors.kBlack;
+        }),
+        side: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return BorderSide.none;
+          }
+          return const BorderSide(color: AppColors.kBorder, width: 1.5),
+        }),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(DS.radiusLg)),
+        ),
+        padding: WidgetStateProperty.all(
+          const EdgeInsets.symmetric(vertical: DS.spaceMd),
+        ),
+      ),
+    );
+  }
+}
+
+class DSRoleBadge extends StatelessWidget {
+  final String role;
+  final bool small;
+
+  const DSRoleBadge({
+    super.key,
+    required this.role,
+    this.small = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isProvider = role == 'provider';
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: small ? DS.spaceSm : DS.spaceMd,
+        vertical: small ? DS.spaceXs : DS.spaceSm,
+      ),
+      decoration: BoxDecoration(
+        color: (isProvider ? Colors.blue : Colors.green).withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(DS.radiusFull),
+        border: Border.all(
+          color: isProvider ? Colors.blue : Colors.green,
+          width: 1.5,
+        ),
+      ),
+      child: DSText.labelSmall(
+        isProvider ? 'Provider' : 'Customer',
+        color: isProvider ? Colors.blue : Colors.green,
+      ),
+    );
+  }
+}
+
 class DSButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;

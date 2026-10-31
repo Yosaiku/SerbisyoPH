@@ -53,6 +53,73 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  void _showRoleSwitchDialog() {
+    final currentRole = _userData?['role'] ?? 'customer';
+    final newRole = currentRole == 'provider' ? 'customer' : 'provider';
+    final newRoleLabel = newRole == 'provider' ? 'Provider' : 'Customer';
+
+    showDialog(
+      context: context,
+      builder: (context) => DSDialog(
+        title: 'Switch to ',
+        content: DSText.bodyMedium(
+          'This will change your account type to . You will be signed out and need to sign in again.',
+          color: AppColors.kGreyText,
+        ),
+        actions: [
+          DSButton.secondary(
+            label: 'Cancel',
+            onPressed: () => Navigator.pop(context),
+          ),
+          DSButton.primary(
+            label: 'Switch',
+            onPressed: () => _switchRole(newRole),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _switchRole(String newRole) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return;
+
+    Navigator.pop(context);
+
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'role': newRole,
+        'has_completed_setup': false,
+      });
+
+      await FirebaseAuth.instance.signOut();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Account switched to . Please sign in again.'),
+            backgroundColor: AppColors.kBlack,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error: "),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,6 +133,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildProfileSection(),
+                  const SizedBox(height: DS.spaceXl),
+                  DSSectionHeader(title: "Account Type"),
+                  const SizedBox(height: DS.spaceMd),
+                  DSActionTile(
+                    icon: _userData?['role'] == 'provider' ? Icons.storefront : Icons.person_outline,
+                    title: _userData?['role'] == 'provider' ? "Provider Account" : "Customer Account",
+                    subtitle: "Switch to  mode",
+                    trailing: DSRoleBadge(role: _userData?['role'] ?? 'customer', small: true),
+                    onTap: _showRoleSwitchDialog,
+                  ),
                   const SizedBox(height: DS.spaceXl),
                   DSSectionHeader(title: "Account"),
                   const SizedBox(height: DS.spaceMd),
@@ -135,7 +212,13 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                DSText.headlineMedium(_userData?['name'] ?? 'User'),
+                Row(
+                  children: [
+                    DSText.headlineMedium(_userData?['name'] ?? 'User'),
+                    const SizedBox(width: DS.spaceMd),
+                    DSRoleBadge(role: _userData?['role'] ?? 'customer', small: true),
+                  ],
+                ),
                 const SizedBox(height: DS.spaceXs),
                 DSText.bodySmall(_userData?['email'] ?? ''),
                 if (_userData?['phone'] != null) ...[

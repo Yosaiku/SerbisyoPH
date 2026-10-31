@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:serbisyo_ph/theme/design_system.dart';
 import 'package:serbisyo_ph/navbars/home_navigation_bar.dart';
 import 'package:serbisyo_ph/navbars/provider_navigation_bar.dart';
+import 'package:serbisyo_ph/pages/provider/provider_setup_page.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -74,7 +75,7 @@ class _SignupPageState extends State<SignupPage> {
         if (_selectedRole == 'provider') {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-              builder: (context) => const ProviderNavigationBar(),
+              builder: (context) => const ProviderSetupPage(),
             ),
             (route) => false,
           );
@@ -126,24 +127,13 @@ class _SignupPageState extends State<SignupPage> {
 
               DSText.labelMedium("I am a"),
               const SizedBox(height: DS.spaceMd),
-              Row(
-                children: [
-                  Expanded(
-                    child: DSChip(
-                      label: "Customer",
-                      selected: _selectedRole == 'customer',
-                      onTap: () => setState(() => _selectedRole = 'customer'),
-                    ),
-                  ),
-                  const SizedBox(width: DS.spaceMd),
-                  Expanded(
-                    child: DSChip(
-                      label: "Provider",
-                      selected: _selectedRole == 'provider',
-                      onTap: () => setState(() => _selectedRole = 'provider'),
-                    ),
-                  ),
-                ],
+              DSSegmentedControl<String>(
+                value: _selectedRole,
+                options: const {
+                  'customer': 'Customer',
+                  'provider': 'Provider',
+                },
+                onChanged: (role) => setState(() => _selectedRole = role),
               ),
 
               const SizedBox(height: DS.spaceXl),
