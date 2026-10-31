@@ -69,8 +69,26 @@ class _LookingForServiceState extends State<LookingForService>
 
   @override
   void dispose() {
+    _cancelPendingOrderOnExit();
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _cancelPendingOrderOnExit() async {
+    final orderId = widget.request['order_id'] as String?;
+    if (orderId == null) return;
+
+    try {
+      final ref = FirebaseFirestore.instance.collection('orders').doc(orderId);
+      final doc = await ref.get();
+      if (doc.exists && doc.data()?['status'] == 'pending') {
+        await ref.update({
+          'status': 'cancelled',
+          'cancelled_at': FieldValue.serverTimestamp(),
+          'cancelled_by': 'customer',
+        });
+      }
+    } catch (_) {}
   }
 
   @override

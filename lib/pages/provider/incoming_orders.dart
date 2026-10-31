@@ -51,12 +51,19 @@ class _IncomingOrdersState extends State<IncomingOrders> {
           );
         }
 
+        final cutoff = DateTime.now().subtract(const Duration(hours: 24));
         final orders = (snapshot.data?.docs ?? []).where((doc) {
           final data = doc.data() as Map<String, dynamic>?;
           if (data == null) return false;
-          return data['status'] == 'pending' &&
-              data['cancelled_at'] == null &&
-              data['cancelled_by'] == null;
+          if (data['status'] != 'pending') return false;
+          if (data['cancelled_at'] != null || data['cancelled_by'] != null) {
+            return false;
+          }
+          final createdAt = data['created_at'];
+          if (createdAt is Timestamp && createdAt.toDate().isBefore(cutoff)) {
+            return false;
+          }
+          return true;
         }).toList();
         orders.sort((a, b) {
           final aTime =
