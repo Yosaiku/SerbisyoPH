@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:serbisyo_ph/theme/colors.dart';
+import 'package:serbisyo_ph/theme/design_system.dart';
 import 'package:serbisyo_ph/pages/chat/chat_page.dart';
 import 'package:serbisyo_ph/utilities/service_icons.dart';
 
@@ -230,45 +230,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   Future<void> _cancelOrder() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Cancel Order?',
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            color: AppColors.kBlack,
-          ),
-        ),
-        content: const Text(
-          'Are you sure you want to cancel this order? This action cannot be undone.',
-          style: TextStyle(color: AppColors.kGreyText),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text(
-              'Keep Order',
-              style: TextStyle(
-                color: AppColors.kGreyText,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.kBlack,
-              foregroundColor: AppColors.kWhite,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: const Text(
-              'Cancel Order',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
+      builder: (context) => const DSConfirmDialog(
+        title: 'Cancel Order?',
+        message: 'Are you sure you want to cancel this order? This action cannot be undone.',
+        dismissLabel: 'Keep Order',
+        confirmLabel: 'Cancel Order',
       ),
     );
 

@@ -1007,6 +1007,48 @@ class DSDialog extends StatelessWidget {
   }
 }
 
+class DSConfirmDialog extends StatelessWidget {
+  final String title;
+  final String message;
+  final String dismissLabel;
+  final String confirmLabel;
+
+  const DSConfirmDialog({
+    super.key,
+    required this.title,
+    required this.message,
+    this.dismissLabel = 'Keep',
+    this.confirmLabel = 'Confirm',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DS.radiusXl)),
+      title: DSText.titleLarge(title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DSText.bodyMedium(message, color: AppColors.kGreyText),
+          const SizedBox(height: DS.spaceXl),
+          DSButton.primary(
+            label: dismissLabel,
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          const SizedBox(height: DS.spaceSm),
+          DSButton.destructive(
+            label: confirmLabel,
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+      actions: const [],
+      actionsPadding: const EdgeInsets.all(DS.spaceLg),
+    );
+  }
+}
+
 class DSAvatar extends StatelessWidget {
   final String? imageUrl;
   final String? initials;

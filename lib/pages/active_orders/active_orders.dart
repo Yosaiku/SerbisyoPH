@@ -213,22 +213,11 @@ class _OrderCardState extends State<OrderCard>
   Future<void> _cancelOrder() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => DSDialog(
+      builder: (context) => const DSConfirmDialog(
         title: 'Cancel Order?',
-        content: DSText.bodyMedium(
-          'Are you sure you want to cancel this order? This action cannot be undone.',
-          color: AppColors.kGreyText,
-        ),
-        actions: [
-          DSButton.secondary(
-            label: 'Keep Order',
-            onPressed: () => Navigator.pop(context, false),
-          ),
-          DSButton.destructive(
-            label: 'Cancel Order',
-            onPressed: () => Navigator.pop(context, true),
-          ),
-        ],
+        message: 'Are you sure you want to cancel this order? This action cannot be undone.',
+        dismissLabel: 'Keep Order',
+        confirmLabel: 'Cancel Order',
       ),
     );
 
