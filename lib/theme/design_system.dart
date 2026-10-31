@@ -315,7 +315,10 @@ class DSSegmentedControl<T> extends StatelessWidget {
       segments: options.entries.map((entry) {
         return ButtonSegment<T>(
           value: entry.key,
-          label: DSText.labelMedium(entry.value),
+          label: DSText.labelMedium(
+            entry.value,
+            color: entry.key == value ? AppColors.kWhite : AppColors.kBlack,
+          ),
         );
       }).toList(),
       selected: {value},
@@ -451,7 +454,7 @@ class DSButton extends StatelessWidget {
                     Icon(icon, size: DS.iconMd),
                     const SizedBox(width: DS.spaceSm),
                   ],
-                  DSText.labelMedium(label),
+                  DSText.labelMedium(label, color: fgColor),
                 ],
               ),
       ),

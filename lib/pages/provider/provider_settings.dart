@@ -234,6 +234,62 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
     }
   }
 
+  void _showRoleSwitchDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => DSDialog(
+        title: "Switch to Customer",
+        content: DSText.bodyMedium(
+          "This will change your account type to Customer. You will be signed out and need to sign in again.",
+          color: AppColors.kGreyText,
+        ),
+        actions: [
+          DSButton.secondary(
+            label: "Cancel",
+            onPressed: () => Navigator.pop(context),
+          ),
+          DSButton.primary(
+            label: "Switch",
+            onPressed: _switchToCustomer,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _switchToCustomer() async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return;
+
+    Navigator.pop(context);
+
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'role': 'customer',
+        'has_completed_setup': false,
+      });
+
+      await FirebaseAuth.instance.signOut();
+
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error: $e"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -271,6 +327,16 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                   DSText.labelMedium("Provider Profile", color: AppColors.kBlack),
                 ],
               ),
+            ),
+            const SizedBox(height: DS.spaceXl),
+            DSSectionHeader(title: "Account Type"),
+            const SizedBox(height: DS.spaceMd),
+            DSActionTile(
+              icon: Icons.person_outline,
+              title: "Provider Account",
+              subtitle: "Switch to Customer mode",
+              trailing: const DSRoleBadge(role: "provider", small: true),
+              onTap: _showRoleSwitchDialog,
             ),
             const SizedBox(height: DS.spaceXl),
             DSSectionHeader(title: "Account Information"),
