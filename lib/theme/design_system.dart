@@ -341,7 +341,7 @@ class DSSegmentedControl<T> extends StatelessWidget {
           if (states.contains(WidgetState.selected)) {
             return BorderSide.none;
           }
-          return const BorderSide(color: AppColors.kBorder, width: 1.5),
+          return BorderSide(color: AppColors.kBorder, width: 1.5);
         }),
         shape: WidgetStateProperty.all(
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(DS.radiusLg)),

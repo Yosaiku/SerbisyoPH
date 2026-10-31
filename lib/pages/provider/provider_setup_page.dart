@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:serbisyo_ph/maps/map_picker.dart';
-import 'package:serbisyo_ph/theme/design_system.dart';
-import 'package:serbisyo_ph/navbars/provider_navigation_bar.dart';
+﻿import "package:flutter/material.dart";
+import "package:firebase_auth/firebase_auth.dart";
+import "package:cloud_firestore/cloud_firestore.dart";
+import "package:geolocator/geolocator.dart";
+import "package:geocoding/geocoding.dart";
+import "package:serbisyo_ph/maps/map_picker.dart";
+import "package:serbisyo_ph/theme/design_system.dart";
+import "package:serbisyo_ph/navbars/provider_navigation_bar.dart";
 
 class ProviderSetupPage extends StatefulWidget {
   const ProviderSetupPage({super.key});
@@ -19,11 +19,12 @@ class _ProviderSetupPageState extends State<ProviderSetupPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
-  String _selectedService = 'Laundry';
-  String _currentAddress = '';
+  String _selectedService = "Laundry";
+  String _currentAddress = "";
   double? _currentLat;
   double? _currentLng;
   bool _hasLocation = false;
+  bool _showLocationError = false;
   bool _saving = false;
 
   @override
@@ -58,20 +59,34 @@ class _ProviderSetupPageState extends State<ProviderSetupPage> {
       return;
     }
 
-    setState(() => _saving = true);
+    if (!_hasLocation) {
+      setState(() => _showLocationError = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Location is required to complete setup"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _saving = true;
+      _showLocationError = false;
+    });
 
     try {
-      await FirebaseFirestore.instance.collection('users').doc(userId).update({
-        'name': _businessNameController.text.trim(),
-        'phone': _phoneController.text.trim(),
-        'description': _descriptionController.text.trim(),
-        'service_type': _selectedService,
-        'address': _currentAddress,
-        'lat': _currentLat,
-        'lng': _currentLng,
-        'has_location': _hasLocation,
-        'is_online': true,
-        'has_completed_setup': true,
+      await FirebaseFirestore.instance.collection("users").doc(userId).update({
+        "name": _businessNameController.text.trim(),
+        "phone": _phoneController.text.trim(),
+        "description": _descriptionController.text.trim(),
+        "service_type": _selectedService,
+        "address": _currentAddress,
+        "lat": _currentLat,
+        "lng": _currentLng,
+        "has_location": _hasLocation,
+        "is_online": true,
+        "has_completed_setup": true,
       });
 
       if (mounted) {
@@ -93,7 +108,7 @@ class _ProviderSetupPageState extends State<ProviderSetupPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Error: "),
+            content: Text("Error: $e"),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -112,10 +127,11 @@ class _ProviderSetupPageState extends State<ProviderSetupPage> {
 
     if (result != null) {
       setState(() {
-        _currentAddress = result['address'];
-        _currentLat = result['lat'];
-        _currentLng = result['lng'];
+        _currentAddress = result["address"];
+        _currentLat = result["lat"];
+        _currentLng = result["lng"];
         _hasLocation = true;
+        _showLocationError = false;
       });
     }
   }
@@ -161,13 +177,14 @@ class _ProviderSetupPageState extends State<ProviderSetupPage> {
       );
 
       Placemark place = placemarks[0];
-      String address = "\, \";
+      String address = "${place.street}, ${place.locality}";
 
       setState(() {
         _currentAddress = address;
         _currentLat = position.latitude;
         _currentLng = position.longitude;
         _hasLocation = true;
+        _showLocationError = false;
         _saving = false;
       });
 
@@ -185,7 +202,7 @@ class _ProviderSetupPageState extends State<ProviderSetupPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Error: \"),
+            content: Text("Error: $e"),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -262,14 +279,12 @@ class _ProviderSetupPageState extends State<ProviderSetupPage> {
             DSSegmentedControl<String>(
               value: _selectedService,
               options: {
-                'Laundry': 'Laundry',
-                'Water Refill': 'Water Refill',
-                'LPG Refill': 'LPG Refill',
+                "Laundry": "Laundry",
+                "Water Refill": "Water Refill",
+                "LPG Refill": "LPG Refill",
               },
               onChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedService = value);
-                }
+                setState(() => _selectedService = value);
               },
             ),
             const SizedBox(height: DS.spaceXl),
@@ -319,6 +334,13 @@ class _ProviderSetupPageState extends State<ProviderSetupPage> {
                       ),
                     ],
                   ),
+                  if (_showLocationError) ...[
+                    const SizedBox(height: DS.spaceMd),
+                    DSText.bodySmall(
+                      "Location is required to complete setup",
+                      color: Colors.red,
+                    ),
+                  ],
                   const SizedBox(height: DS.spaceLg),
                   Row(
                     children: [
@@ -345,7 +367,7 @@ class _ProviderSetupPageState extends State<ProviderSetupPage> {
             const SizedBox(height: DS.spaceXl),
             DSButton.primary(
               label: "Complete Setup",
-              onPressed: _saving ? null : _saveProfile,
+              onPressed: _saving || !_hasLocation ? null : _saveProfile,
               loading: _saving,
             ),
             const SizedBox(height: DS.space2xl),

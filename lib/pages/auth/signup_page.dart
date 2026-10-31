@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:serbisyo_ph/theme/design_system.dart';
-import 'package:serbisyo_ph/navbars/home_navigation_bar.dart';
-import 'package:serbisyo_ph/navbars/provider_navigation_bar.dart';
-import 'package:serbisyo_ph/pages/provider/provider_setup_page.dart';
+﻿import "package:flutter/material.dart";
+import "package:firebase_auth/firebase_auth.dart";
+import "package:cloud_firestore/cloud_firestore.dart";
+import "package:serbisyo_ph/theme/design_system.dart";
+import "package:serbisyo_ph/navbars/home_navigation_bar.dart";
+import "package:serbisyo_ph/pages/provider/provider_setup_page.dart";
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -25,7 +24,7 @@ class _SignupPageState extends State<SignupPage> {
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   String? _errorMessage;
-  String _selectedRole = 'customer';
+  String _selectedRole = "customer";
 
   @override
   void dispose() {
@@ -61,18 +60,19 @@ class _SignupPageState extends State<SignupPage> {
           );
 
       await FirebaseFirestore.instance
-          .collection('users')
+          .collection("users")
           .doc(credential.user!.uid)
           .set({
-        'name': nameController.text.trim(),
-        'email': emailController.text.trim(),
-        'phone': phoneController.text.trim(),
-        'role': _selectedRole,
-        'createdAt': FieldValue.serverTimestamp(),
+        "name": nameController.text.trim(),
+        "email": emailController.text.trim(),
+        "phone": phoneController.text.trim(),
+        "role": _selectedRole,
+        "has_completed_setup": false,
+        "createdAt": FieldValue.serverTimestamp(),
       });
 
       if (mounted) {
-        if (_selectedRole == 'provider') {
+        if (_selectedRole == "provider") {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (context) => const ProviderSetupPage(),
@@ -97,14 +97,14 @@ class _SignupPageState extends State<SignupPage> {
 
   String _friendlyError(String code) {
     switch (code) {
-      case 'email-already-in-use':
-        return 'An account already exists with that email.';
-      case 'invalid-email':
-        return 'Please enter a valid email address.';
-      case 'weak-password':
-        return 'Password must be at least 6 characters.';
+      case "email-already-in-use":
+        return "An account already exists with that email.";
+      case "invalid-email":
+        return "Please enter a valid email address.";
+      case "weak-password":
+        return "Password must be at least 6 characters.";
       default:
-        return 'Something went wrong. Please try again.';
+        return "Something went wrong. Please try again.";
     }
   }
 
@@ -130,8 +130,8 @@ class _SignupPageState extends State<SignupPage> {
               DSSegmentedControl<String>(
                 value: _selectedRole,
                 options: const {
-                  'customer': 'Customer',
-                  'provider': 'Provider',
+                  "customer": "Customer",
+                  "provider": "Provider",
                 },
                 onChanged: (role) => setState(() => _selectedRole = role),
               ),

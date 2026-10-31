@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:serbisyo_ph/theme/design_system.dart';
-import 'package:serbisyo_ph/pages/auth/login_page.dart';
-import 'package:serbisyo_ph/pages/notifications/notifications_page.dart';
-import 'package:serbisyo_ph/pages/settings/edit_profile_page.dart';
+﻿import "package:flutter/material.dart";
+import "package:cloud_firestore/cloud_firestore.dart";
+import "package:firebase_auth/firebase_auth.dart";
+import "package:serbisyo_ph/theme/design_system.dart";
+import "package:serbisyo_ph/pages/auth/login_page.dart";
+import "package:serbisyo_ph/pages/notifications/notifications_page.dart";
+import "package:serbisyo_ph/pages/settings/edit_profile_page.dart";
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -31,7 +31,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
 
     final doc = await FirebaseFirestore.instance
-        .collection('users')
+        .collection("users")
         .doc(userId)
         .get();
 
@@ -54,25 +54,25 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _showRoleSwitchDialog() {
-    final currentRole = _userData?['role'] ?? 'customer';
-    final newRole = currentRole == 'provider' ? 'customer' : 'provider';
-    final newRoleLabel = newRole == 'provider' ? 'Provider' : 'Customer';
+    final currentRole = _userData?["role"] ?? "customer";
+    final newRole = currentRole == "provider" ? "customer" : "provider";
+    final newRoleLabel = newRole == "provider" ? "Provider" : "Customer";
 
     showDialog(
       context: context,
       builder: (context) => DSDialog(
-        title: 'Switch to ',
+        title: "Switch to $newRoleLabel",
         content: DSText.bodyMedium(
-          'This will change your account type to . You will be signed out and need to sign in again.',
+          "This will change your account type to $newRoleLabel. You will be signed out and need to sign in again.",
           color: AppColors.kGreyText,
         ),
         actions: [
           DSButton.secondary(
-            label: 'Cancel',
+            label: "Cancel",
             onPressed: () => Navigator.pop(context),
           ),
           DSButton.primary(
-            label: 'Switch',
+            label: "Switch",
             onPressed: () => _switchRole(newRole),
           ),
         ],
@@ -87,9 +87,9 @@ class _SettingsPageState extends State<SettingsPage> {
     Navigator.pop(context);
 
     try {
-      await FirebaseFirestore.instance.collection('users').doc(userId).update({
-        'role': newRole,
-        'has_completed_setup': false,
+      await FirebaseFirestore.instance.collection("users").doc(userId).update({
+        "role": newRole,
+        "has_completed_setup": false,
       });
 
       await FirebaseAuth.instance.signOut();
@@ -97,7 +97,7 @@ class _SettingsPageState extends State<SettingsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Account switched to . Please sign in again.'),
+            content: Text("Account switched to ${newRole == "provider" ? "Provider" : "Customer"}. Please sign in again."),
             backgroundColor: AppColors.kBlack,
             behavior: SnackBarBehavior.floating,
           ),
@@ -111,7 +111,7 @@ class _SettingsPageState extends State<SettingsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Error: "),
+            content: Text("Error: $e"),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -137,10 +137,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   DSSectionHeader(title: "Account Type"),
                   const SizedBox(height: DS.spaceMd),
                   DSActionTile(
-                    icon: _userData?['role'] == 'provider' ? Icons.storefront : Icons.person_outline,
-                    title: _userData?['role'] == 'provider' ? "Provider Account" : "Customer Account",
-                    subtitle: "Switch to  mode",
-                    trailing: DSRoleBadge(role: _userData?['role'] ?? 'customer', small: true),
+                    icon: _userData?["role"] == "provider" ? Icons.storefront : Icons.person_outline,
+                    title: _userData?["role"] == "provider" ? "Provider Account" : "Customer Account",
+                    subtitle: "Switch to ${_userData?["role"] == "provider" ? "Customer" : "Provider"} mode",
+                    trailing: DSRoleBadge(role: _userData?["role"] ?? "customer", small: true),
                     onTap: _showRoleSwitchDialog,
                   ),
                   const SizedBox(height: DS.spaceXl),
@@ -204,7 +204,7 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Row(
         children: [
           DSAvatar(
-            initials: _userData?['name']?.substring(0, 1).toUpperCase() ?? 'U',
+            initials: _userData?["name"]?.substring(0, 1).toUpperCase() ?? "U",
             size: DS.avatarLg,
           ),
           const SizedBox(width: DS.spaceLg),
@@ -214,16 +214,16 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 Row(
                   children: [
-                    DSText.headlineMedium(_userData?['name'] ?? 'User'),
+                    DSText.headlineMedium(_userData?["name"] ?? "User"),
                     const SizedBox(width: DS.spaceMd),
-                    DSRoleBadge(role: _userData?['role'] ?? 'customer', small: true),
+                    DSRoleBadge(role: _userData?["role"] ?? "customer", small: true),
                   ],
                 ),
                 const SizedBox(height: DS.spaceXs),
-                DSText.bodySmall(_userData?['email'] ?? ''),
-                if (_userData?['phone'] != null) ...[
+                DSText.bodySmall(_userData?["email"] ?? ""),
+                if (_userData?["phone"] != null) ...[
                   const SizedBox(height: DS.spaceXs),
-                  DSText.bodySmall(_userData!['phone']),
+                  DSText.bodySmall(_userData!["phone"]),
                 ],
               ],
             ),
